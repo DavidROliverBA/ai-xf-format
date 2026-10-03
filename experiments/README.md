@@ -20,7 +20,7 @@ the numbers land in [`RESULTS.md`](./RESULTS.md).
 | `e10-database/` | E10 | Up: what happens when a department of concurrent writers moves bundles into Postgres (round trip, locking, CQRS, blue/green)? |
 | `e11-migration/` | E11 | In: what a Confluence space or SharePoint Word library keeps, loses or leaks on the way into AI-XF, naive versus mapped |
 | `e12-longview/` | E12 | Across: an AI-XF bundle federated into Longview's database and exported back out |
-| `e13-canonical/` | E13 | Can a canonical serialisation make two implementations, and a database, write the same bytes for the same concept? Pre-registered: hypotheses and pass marks in `PLAN.md`, committed before any run |
+| `e13-canonical/` | E13 | Can a canonical serialisation make two implementations, and a database, write the same bytes for the same concept? Pre-registered in `PLAN.md`; all six hypotheses passed (192 concepts, two implementations byte-identical) |
 
 Everything here is a fixture, not a product. Re-run with the commands in each
 directory's `run.sh`; each experiment records the tool and client versions it

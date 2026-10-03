@@ -224,6 +224,14 @@ The two misses (q09, q11) need a second hop that one search-then-get cannot make
 
 **E12, across (Longview).** Federate import of `examples/` and `psychology` into a throwaway Longview database: every concept stored verbatim with identity and trust tier; **0 of 431 typed links** reach Longview's working tables; retirements and deletions in the bundle do not propagate to its projection (accumulation, as in E8). Longview's export passes its vendored validator and warns 5 times under v0.4.3 (date-only timestamps), which its gate treats as failure. **AI-XF gaps:** the validator still warns on custom rels a bundle declares in its own `vocabularies.rels`; `examples/manifest.ai-xf.yaml` still says `ai-xf: "0.3"` and `producer: hand-authored` (not an actor).
 
+## E13: canonical serialisation (pre-registered)
+
+**2026-10-03.** Plan and pass marks committed before the run (`c610e31`, hardened in `2196ce2`). Detail in `e13-canonical/e13-results.md`.
+
+192 concepts from nine bundles (hand-written, the vault exporter, KnowledgeX). **All six hypotheses pass at 100%:** idempotent (192/192); meaning preserved (data model 192/192, validator findings identical in 18 bundle-and-parser comparisons, 0 whole-number floats); Python and TypeScript implementations byte-identical (192/192); a Postgres `jsonb` round trip regenerates the identical file (192/192, against E10's 0/172); the `sha256:` hash ignores 1,536/1,536 formatting-only variants and catches 767/767 single-value mutations; YAML 1.1 readers see the same values (192/192). No producer writes canonical files today (0/192), so the form is a write-time step, not an existing convention.
+
+**Open before spec text:** a date-only value under a custom key (KnowledgeX's `created: 2026-10-02`) is quoted, so a YAML 1.1 reader that saw a date in the original now sees a string; and Longview's export is not yet in the corpus. **Supports:** proposing `CANONICAL.md` and the content hash for v0.5.
+
 ---
 
 ## Summary and the v0.4 gate

@@ -1,0 +1,174 @@
+{
+  "concepts": 192,
+  "files_listed": 192,
+  "results": {
+    "H1": {
+      "ok": 192,
+      "of": 192,
+      "pass": true
+    },
+    "H2": {
+      "ok": 192,
+      "of": 192,
+      "pass": true
+    },
+    "H3": {
+      "ok": 192,
+      "of": 192,
+      "pass": true
+    },
+    "H4": {
+      "ok": 192,
+      "of": 192,
+      "pass": true
+    },
+    "H5a": {
+      "ok": 1536,
+      "of": 1536,
+      "pass": true
+    },
+    "H5b": {
+      "ok": 767,
+      "of": 767,
+      "pass": true
+    },
+    "H6": {
+      "ok": 192,
+      "of": 192,
+      "pass": true
+    }
+  },
+  "validator_before_after": {
+    "ai-concepts-kb (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 98
+    },
+    "ai-concepts-kb (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 98
+    },
+    "e2-bundle-a (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-a (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-b (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-b (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-c (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 4
+    },
+    "e2-bundle-c (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 4
+    },
+    "examples (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "examples (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-data-eng (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-data-eng (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-household (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-household (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "knowledgex (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 7
+    },
+    "knowledgex (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 7
+    },
+    "psychology-kb (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 108
+    },
+    "psychology-kb (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 108
+    }
+  },
+  "whole_number_floats": [],
+  "variant_generator_invalid": {},
+  "failures": {},
+  "diagnostic_already_canonical": {
+    "ai-concepts-kb": {
+      "canonical": 0,
+      "of": 63
+    },
+    "e2-bundle-a": {
+      "canonical": 0,
+      "of": 2
+    },
+    "e2-bundle-b": {
+      "canonical": 0,
+      "of": 2
+    },
+    "e2-bundle-c": {
+      "canonical": 0,
+      "of": 2
+    },
+    "examples": {
+      "canonical": 0,
+      "of": 7
+    },
+    "fixtures-data-eng": {
+      "canonical": 0,
+      "of": 5
+    },
+    "fixtures-household": {
+      "canonical": 0,
+      "of": 5
+    },
+    "knowledgex": {
+      "canonical": 0,
+      "of": 4
+    },
+    "psychology-kb": {
+      "canonical": 0,
+      "of": 102
+    }
+  }
+}
