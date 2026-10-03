@@ -64,3 +64,27 @@ diagnostic need Docker and are skipped, with a note, without it.
 - **H3 fails:** the rules are not exact enough; tighten `CANONICAL.md` and
   re-run as E13b, recording the failure here.
 - **H2 or H6 fails:** the form changes meaning; it must not ship.
+
+## E13b: which date and datetime strings stay plain (added 2026-10-03, before its run)
+
+The first run passed every hypothesis but exposed a question H6 does not
+measure. CANONICAL.md §5 keeps a timestamp-shaped string plain only under five
+keys (**option A**). Elsewhere a date such as KnowledgeX's `created:
+2026-10-02` is quoted, so a YAML 1.1 reader that saw a date in the original sees
+a string in the canonical file. The reverse also happens: the vault exporter
+quotes its timestamps, and the canonical form writes them plain. The
+alternative, **option B**, keeps every string that matches an ISO 8601 date
+(`YYYY-MM-DD`) or the §5 datetime pattern plain, whatever its key. Under the
+YAML 1.2 model both are strings either way; only YAML 1.1 readers see a
+difference.
+
+**New measure:** for every concept, the number of values whose YAML 1.1 reading
+(PyYAML `safe_load`, type and value) differs between the original file and the
+canonical one.
+
+**Decision rule, fixed now:** adopt the option with fewer such changes across the
+corpus; on a tie, option B, because its rule needs no list of keys. The adopted
+option must still pass H1–H6 at 100%, measured on the corpus **plus Longview's
+export** (`E13_LONGVIEW=1`, its mock eval-day fixture on a throwaway database).
+If it does not, neither option ships and the question goes back to design.
+
