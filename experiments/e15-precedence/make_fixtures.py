@@ -13,6 +13,7 @@ Four federations, each a directory under fixtures/ with a federation.ai-xf.yaml:
 Every concept is minimal and passes Level 2 on its own bundle, except where a case needs otherwise
 (outer, today, fails on the nested duplicate id: that is gap 4).
 """
+import json
 import shutil
 from pathlib import Path
 
@@ -21,9 +22,15 @@ FIX = HERE / "fixtures"
 AT = "2026-10-04T09:00:00Z"
 
 
+def scalar(v: str) -> str:
+    """Quote a value that is not safe as a plain YAML scalar (E15 amendment: the first fixtures
+    wrote `description: A path target: concepts/home.md.` unquoted, which is invalid YAML)."""
+    return json.dumps(v) if (": " in v or " #" in v or v[:1] in "&*!|>'\"%@`[]{},#?-:") else v
+
+
 def concept(path: Path, cid: str, title: str, aliases=(), note: str = "E15 fixture concept."):
     path.parent.mkdir(parents=True, exist_ok=True)
-    fm = ["---", "type: Concept", f"id: {cid}", f"title: {title}", f"description: {note}"]
+    fm = ["---", "type: Concept", f"id: {cid}", f"title: {scalar(title)}", f"description: {scalar(note)}"]
     if aliases:
         fm += ["aliases:"] + [f"  - {a}" for a in aliases]
     fm += ["generated:", "  by: human:e15-fixture", f"  at: {AT}", "---", "", f"# {title}", "", note, ""]
@@ -33,7 +40,7 @@ def concept(path: Path, cid: str, title: str, aliases=(), note: str = "E15 fixtu
 def manifest(root: Path, ns: str, desc: str):
     root.mkdir(parents=True, exist_ok=True)
     (root / "manifest.ai-xf.yaml").write_text(
-        f'ai-xf: "0.5"\nname: {ns}\nnamespace: {ns}\ndescription: {desc}\n'
+        f'ai-xf: "0.5"\nname: {ns}\nnamespace: {ns}\ndescription: {scalar(desc)}\n'
         f"producer: human:e15-fixture\ngenerated: {AT}\nconformance: 2\n", encoding="utf-8")
 
 

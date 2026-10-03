@@ -117,3 +117,16 @@ which bundle `zed` does not have; its only concept is `concepts/reader.md`. c21
 is an `id` reference, so the containing concept does not affect its outcome; the
 input is corrected in `cases.json`, `cases-input.json` and the independent
 resolver's copy. Expected outcomes are unchanged.
+
+**Amendment 2, 2026-10-04, before any result was compared.** The independent
+resolver reported that three fixture concepts are not valid YAML: their
+unquoted `description` contained `": "`. Checking every fixture file with PyYAML
+then found the same fault in all eight bundle manifests. The validator's built-in
+fallback parser accepted all of them, which is why the fixtures passed when they
+were written; PyYAML rejects them. The generator now quotes any value that is not
+safe as a plain scalar, and every fixture file parses under PyYAML and passes
+Level 2 under both parsers. Cases and expected outcomes are unchanged. The
+independent resolver is re-run, without any change to its code, on the corrected
+fixtures. Its first run, on the faulty fixtures, is kept as `results-indep-run1.json`
+and its notes as written. The fallback parser accepting invalid YAML is a
+validator defect in its own right, recorded in the results, outside H1–H5.

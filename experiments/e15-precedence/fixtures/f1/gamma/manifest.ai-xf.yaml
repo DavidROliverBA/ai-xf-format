@@ -1,7 +1,7 @@
 ai-xf: "0.5"
 name: gamma
 namespace: gamma
-description: E15 f1: a third bundle, so collisions have more than two candidates.
+description: "E15 f1: a third bundle, so collisions have more than two candidates."
 producer: human:e15-fixture
 generated: 2026-10-04T09:00:00Z
 conformance: 2

@@ -1,7 +1,7 @@
 ai-xf: "0.5"
 name: outer
 namespace: outer
-description: E15 f4: a department bundle with a team bundle nested inside it.
+description: "E15 f4: a department bundle with a team bundle nested inside it."
 producer: human:e15-fixture
 generated: 2026-10-04T09:00:00Z
 conformance: 2
