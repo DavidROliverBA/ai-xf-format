@@ -7,8 +7,10 @@
 # idempotence), then measure.py computes H1–H6 and the producer diagnostic into results.json.
 #
 # Needs: uv, bun. Optional: Docker (H4, the Postgres round trip; and the Longview diagnostic with
-# E13_LONGVIEW=1, which also needs ~/Documents/GitHub/longview), bunx (the KnowledgeX notebook).
-# Writes only to a temp directory, plus results.json here. Never touches an existing container.
+# E13_LONGVIEW=1, which also needs ~/Documents/GitHub/longview). Downloads no third-party code: the
+# KnowledgeX notebook is a fixture saved from E9 (knowledgex@0.4.0, 2026-10-02), and containers
+# listen on 127.0.0.1 only. Writes only to a temp directory, plus results.json here. Never touches
+# an existing container.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
@@ -26,26 +28,16 @@ for b in psychology-kb ai-concepts-kb; do
   if [ -d "$HOME/Documents/GitHub/$b" ]; then copy "$HOME/Documents/GitHub/$b" "$b"; else echo "skip: $b not found"; fi
 done
 
-# The E9 KnowledgeX notebook (a third-party producer), when bunx is available.
-if command -v bunx >/dev/null; then
-  NB="$C/knowledgex"; mkdir -p "$NB"
-  kx() { bunx "knowledgex@0.4.0" "$@" >/dev/null; }
-  kx new Decision "Use PostgreSQL as the job queue" --description "Jobs go through a Postgres table with SKIP LOCKED, not a broker." --by human:tester --source design=https://example.com/adr-12 --bundle "$NB"
-  kx new Decision "Use Redis as the job queue" --description "Jobs go through Redis lists." --by human:tester --bundle "$NB"
-  kx new Concept "SKIP LOCKED" --description "Postgres row locking that lets workers skip claimed rows." --by claude-code/test --tags postgres --bundle "$NB"
-  kx new Lesson "Brokers add an operational dependency" --description "Every broker is one more thing to page someone about." --by human:tester --bundle "$NB"
-  kx relate use-postgresql-as-the-job-queue.md supersedes use-redis-as-the-job-queue.md --by human:tester --bundle "$NB"
-  kx verify skip-locked.md --by human:tester --bundle "$NB"
-else
-  echo "skip: KnowledgeX notebook (no bunx)"
-fi
+# A KnowledgeX notebook (a third-party producer): saved from E9's run rather than regenerated, so
+# no package is downloaded and run here.
+copy "$HERE/fixtures/knowledgex" knowledgex
 
 DOCKER=0; command -v docker >/dev/null && docker info >/dev/null 2>&1 && DOCKER=1
 
 # Longview's export, from its mock eval-day fixture on a throwaway database (opt-in).
 if [ "${E13_LONGVIEW:-0}" = 1 ] && [ "$DOCKER" = 1 ] && [ -d "$HOME/Documents/GitHub/longview" ]; then
   docker run -d --rm --name aixf-e13-lv -e POSTGRES_USER=longview -e POSTGRES_PASSWORD=longview \
-    -e POSTGRES_DB=longview -p 55416:5432 pgvector/pgvector:pg17 >/dev/null
+    -e POSTGRES_DB=longview -p 127.0.0.1:55416:5432 pgvector/pgvector:pg17 >/dev/null
   trap 'docker stop aixf-e13-lv >/dev/null 2>&1 || true' EXIT
   for _ in $(seq 1 30); do docker exec aixf-e13-lv pg_isready -U longview -q && break; sleep 1; done
   (cd "$HOME/Documents/GitHub/longview" && export DATABASE_URL=postgres://longview:longview@localhost:55416/longview \
@@ -70,7 +62,7 @@ bun run canon.ts "$W/ts" "$W/ts2" "$W/list.txt"
 # H4: a throwaway Postgres for the jsonb round trip.
 DB_ARGS=()
 if [ "$DOCKER" = 1 ]; then
-  docker run -d --rm --name aixf-e13-pg -e POSTGRES_PASSWORD=e13 -p 55413:5432 postgres:17 >/dev/null
+  docker run -d --rm --name aixf-e13-pg -e POSTGRES_PASSWORD=e13 -p 127.0.0.1:55413:5432 postgres:17 >/dev/null
   trap 'docker stop aixf-e13-pg >/dev/null 2>&1 || true' EXIT
   for _ in $(seq 1 30); do docker exec aixf-e13-pg pg_isready -U postgres -q && break; sleep 1; done
   DB_ARGS=(--db "postgresql://postgres:e13@localhost:55413/postgres")

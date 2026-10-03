@@ -191,6 +191,7 @@ def main() -> None:
     fails = defaultdict(list)
     diag = defaultdict(lambda: [0, 0])
     gen_invalid = defaultdict(int)
+    whole_floats = []        # PLAN amendment: a float with no fractional part would change type
     models = {}
 
     for rel in files:
@@ -202,6 +203,17 @@ def main() -> None:
             fails["unparseable"].append(f"{rel}: {e}")
             continue
         models[rel] = (fm, body)
+
+        def walk(v, path=""):
+            if isinstance(v, float) and v.is_integer():
+                whole_floats.append(f"{rel}:{path}")
+            elif isinstance(v, dict):
+                for k, x in v.items():
+                    walk(x, f"{path}.{k}" if path else str(k))
+            elif isinstance(v, list):
+                for i, x in enumerate(v):
+                    walk(x, f"{path}[{i}]")
+        walk(fm)
         py, ts = (work / "py" / rel).read_text(encoding="utf-8"), (work / "ts" / rel).read_text(encoding="utf-8")
         py2, ts2 = (work / "py2" / rel).read_text(encoding="utf-8"), (work / "ts2" / rel).read_text(encoding="utf-8")
         diag[bundle][0] += 1
@@ -269,7 +281,7 @@ def main() -> None:
 
     rate = lambda h: (res[h]["ok"], res[h]["n"])
     passed = {h: (res[h]["n"] > 0 and res[h]["ok"] == res[h]["n"]) for h in res}
-    passed["H2"] = passed["H2"] and validator_ok
+    passed["H2"] = passed["H2"] and validator_ok and not whole_floats
     if not db_url:
         passed["H4"] = None
     out = {
@@ -277,6 +289,7 @@ def main() -> None:
         "files_listed": len(files),
         "results": {h: {"ok": rate(h)[0], "of": rate(h)[1], "pass": passed[h]} for h in res},
         "validator_before_after": validator,
+        "whole_number_floats": whole_floats,
         "variant_generator_invalid": dict(gen_invalid),
         "failures": dict(fails),
         "diagnostic_already_canonical": {b: {"canonical": c, "of": n} for b, (n, c) in sorted(diag.items())},
@@ -284,6 +297,7 @@ def main() -> None:
     (HERE / "results.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"concepts": out["concepts"], "results": out["results"],
                       "validator_identical": validator_ok,
+                      "whole_number_floats": len(whole_floats),
                       "already_canonical": out["diagnostic_already_canonical"]}, indent=1))
 
 
