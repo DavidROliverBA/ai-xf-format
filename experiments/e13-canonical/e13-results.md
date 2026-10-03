@@ -126,3 +126,24 @@ from a JSON store as an integer. No real producer writes such numbers, which is
 why E13 and E13b passed; the adversarial set was built to find exactly this. By
 the plan, the form was **not** vendored into Longview.
 
+## E13d: the number rule — passes
+
+**2026-10-03.** Pre-registered (`b265766`). Integers are written as digits at any
+magnitude, and an exponent mantissa gains `.0`. Same 273 concepts as E13c (five
+producers with Longview, plus the adversarial set). Numbers in
+`results-e13d.json`.
+
+| Hypothesis | Result |
+|---|---|
+| H1–H6 | **all 100%**: 273 / 273 each; H5a 2,179 / 2,179 variants; H5b 1,088 / 1,088 mutations |
+| Validator findings before and after | identical in all 22 comparisons (11 bundles, both parsers) |
+| Whole-number floats in the real producers | 0 |
+| Documented limit | the adversarial `huge: 1.0e+21` is written `1000000000000000000000`: an integer to YAML 1.1 and Python, the same number to JSON and YAML 1.2 |
+
+The YAML 1.1 view now changes in only 7 values across the corpus, against 409 in
+E13b, because the real bundles were re-exported in canonical form in between and
+so are already canonical at source.
+
+**Decision:** the form passes on real and hostile data, so it is vendored into
+Longview. SPEC Appendix D carries the E13c and E13d rules.
+

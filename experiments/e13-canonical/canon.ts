@@ -110,7 +110,11 @@ function scalar(v: Value, key?: string): string {
     if (Number.isNaN(v)) return ".nan";
     if (!Number.isFinite(v)) return v < 0 ? "-.inf" : ".inf";
     if (v === 0) return "0";
-    return String(v); // ECMAScript Number.prototype.toString; integral values below 1e21 print as integers
+    // E13d: integer digits at any magnitude; an exponent mantissa gets a decimal point for YAML 1.1
+    if (Number.isInteger(v)) return Math.abs(v) < 1e21 ? String(v) : BigInt(v).toString();
+    const r = String(v);
+    const e = r.indexOf("e");
+    return e >= 0 && !r.slice(0, e).includes(".") ? `${r.slice(0, e)}.0${r.slice(e)}` : r;
   }
   const s = String(v);
   checkSurrogates(s);

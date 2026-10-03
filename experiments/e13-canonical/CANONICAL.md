@@ -75,7 +75,7 @@ writer's ordering of `sources`), so the canonical form never sorts a list.
 | null | `null` |
 | boolean | `true` / `false` |
 | integer | decimal digits, with `-` when negative |
-| other number | the shortest decimal that reads back as the same number, as ECMAScript's `Number.prototype.toString` writes it (so `0.5`, `1e+21`, `1e-7`); a number with no fractional part below 1e21 is written as an integer (`1.0` → `1`); infinity and not-a-number as `.inf`, `-.inf`, `.nan`; negative zero as `0` |
+| other number | a number with no fractional part as integer digits, whatever its magnitude (`1.0` → `1`, `1e21` → `1000000000000000000000`); any other as ECMAScript's `Number.prototype.toString` writes it (the shortest decimal that reads back as the same number, so `0.5`), except that an exponent form whose mantissa has no decimal point gains `.0` (`1e-7` → `1.0e-7`) so YAML 1.1 reads a float (E13d); infinity and not-a-number as `.inf`, `-.inf`, `.nan`; negative zero as `0`. A float with no fractional part therefore becomes an integer, and integers beyond ±(2^53 − 1) cannot be held exactly by JavaScript or JSON-based systems: producers SHOULD NOT use either |
 | string, **date or timestamp** | plain when it matches `YYYY-MM-DD`, or `YYYY-MM-DDTHH:MM:SS` with an optional fraction and `Z` or `±HH:MM`, under any key (adopted in E13b; the first run used a list of five keys) |
 | string, **plain-safe** | plain, without quotes |
 | any other string | double-quoted |

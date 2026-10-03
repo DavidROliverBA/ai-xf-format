@@ -202,6 +202,7 @@ def main() -> None:
     diag = defaultdict(lambda: [0, 0])
     gen_invalid = defaultdict(int)
     whole_floats = []        # PLAN amendment: a float with no fractional part would change type
+    documented_limit = []    # E13d: the adversarial set's deliberate whole-number floats
     y11_changes = defaultdict(lambda: [0, 0])   # E13b: bundle -> [values changed, concepts affected]
     models = {}
 
@@ -216,8 +217,10 @@ def main() -> None:
         models[rel] = (fm, body)
 
         def walk(v, path=""):
-            if isinstance(v, float) and v.is_integer():
+            if isinstance(v, float) and v.is_integer() and bundle != "adversarial":   # E13d scope
                 whole_floats.append(f"{rel}:{path}")
+            elif isinstance(v, float) and v.is_integer():
+                documented_limit.append(f"{rel}:{path}")
             elif isinstance(v, dict):
                 for k, x in v.items():
                     walk(x, f"{path}.{k}" if path else str(k))
@@ -311,6 +314,7 @@ def main() -> None:
         "results": {h: {"ok": rate(h)[0], "of": rate(h)[1], "pass": passed[h]} for h in res},
         "validator_before_after": validator,
         "whole_number_floats": whole_floats,
+        "whole_number_floats_documented_limit": documented_limit,
         "dates_option": canon.DATES,
         "yaml11_view_changes": {b: {"values": v, "concepts": c} for b, (v, c) in sorted(y11_changes.items())},
         "yaml11_view_changes_total": sum(v for v, _ in y11_changes.values()),

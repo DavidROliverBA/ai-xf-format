@@ -232,6 +232,8 @@ The two misses (q09, q11) need a second hop that one search-then-get cannot make
 
 **E13b** (pre-registered, `8b7cd51`) settled the open date question and added Longview's export (268 concepts, five producers). Both options pass H1–H6 at 100%. Keeping every date or datetime shape plain (option B) changes 409 values in a YAML 1.1 reader's view against 411 for the five-key list, so B is adopted. 407 of those changes are the same either way (quoted timestamps written plain): quoting is not data, so the spec must tell readers to take dates and timestamps as strings, as OKF's reference implementation does since PR #6. **Supports:** proposing `CANONICAL.md` and the content hash for v0.5.
 
+**E13c and E13d** (pre-registered, `f4b3639`, `b265766`). Vendoring the form into Longview found a gap: NEL, U+2028, U+2029 and C1 controls written plain make a file PyYAML cannot read. With an escape rule and a hand-written adversarial set added (273 concepts), E13c **failed** on numbers alone: ECMAScript's `1e+21` and `1e-7` read as strings in YAML 1.1, and `1e21` returns from `jsonb` as an integer. E13d writes integers as digits at any size and gives exponent mantissas a decimal point: **H1–H6 all 100%** on the same 273, validator findings identical in 22 comparisons, no whole-number floats in real data. Documented limit: a float with no fractional part becomes an integer. The form is vendored into Longview.
+
 ---
 
 ## Summary and the v0.4 gate

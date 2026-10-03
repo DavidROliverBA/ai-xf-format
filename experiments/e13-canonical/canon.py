@@ -201,9 +201,11 @@ def scalar(v, key=None) -> str:
             return "-.inf" if v < 0 else ".inf"
         if v == 0:
             return "0"
-        if v.is_integer() and abs(v) < 1e21:
+        if v.is_integer():                   # E13d: integer digits at any magnitude
             return str(int(v))
-        return js_number(v)
+        r = js_number(v)
+        mant, e, exp = r.partition("e")
+        return f"{mant}.0e{exp}" if e and "." not in mant else r   # E13d: YAML 1.1 needs a point
     s = str(v)
     check_surrogates(s)
     if DATES == "shape" and (TS_RE.match(s) or DATE_RE.match(s)):
