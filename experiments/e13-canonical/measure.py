@@ -12,6 +12,7 @@ import copy
 import datetime as dt
 import hashlib
 import json
+import os
 import random
 import re
 import shutil
@@ -63,6 +64,15 @@ def same(a, b, skip_timestamps=False) -> bool:
     if ka == "num" and a != a and b != b:   # NaN
         return True
     return a == b
+
+
+def changed_leaves(a, b) -> int:
+    """Values a YAML 1.1 reader sees differently (type or value) between two readings."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return sum(changed_leaves(a.get(k), b.get(k)) for k in a.keys() | b.keys())
+    if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+        return sum(changed_leaves(x, y) for x, y in zip(a, b))
+    return 0 if (type(a) is type(b) and a == b) else 1
 
 
 def norm_body(b: str) -> str:
@@ -192,6 +202,7 @@ def main() -> None:
     diag = defaultdict(lambda: [0, 0])
     gen_invalid = defaultdict(int)
     whole_floats = []        # PLAN amendment: a float with no fractional part would change type
+    y11_changes = defaultdict(lambda: [0, 0])   # E13b: bundle -> [values changed, concepts affected]
     models = {}
 
     for rel in files:
@@ -244,6 +255,12 @@ def main() -> None:
         for name, text in mutations(fm, body).items():
             tally("H5b", "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest() != h_orig, name)
         y11 = yaml.safe_load(canon.split(py)[0]) or {}
+        try:
+            n_changed = changed_leaves(yaml.safe_load(canon.split(orig)[0]) or {}, y11)
+        except yaml.YAMLError:
+            n_changed = 0
+        y11_changes[bundle][0] += n_changed
+        y11_changes[bundle][1] += n_changed > 0
         tally("H6", same(y11, cfm, skip_timestamps=True))
 
     # H2, second half: validator findings, before and after, under both parsers
@@ -290,14 +307,19 @@ def main() -> None:
         "results": {h: {"ok": rate(h)[0], "of": rate(h)[1], "pass": passed[h]} for h in res},
         "validator_before_after": validator,
         "whole_number_floats": whole_floats,
+        "dates_option": canon.DATES,
+        "yaml11_view_changes": {b: {"values": v, "concepts": c} for b, (v, c) in sorted(y11_changes.items())},
+        "yaml11_view_changes_total": sum(v for v, _ in y11_changes.values()),
         "variant_generator_invalid": dict(gen_invalid),
         "failures": dict(fails),
         "diagnostic_already_canonical": {b: {"canonical": c, "of": n} for b, (n, c) in sorted(diag.items())},
     }
-    (HERE / "results.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    (HERE / os.environ.get("E13_RESULTS", "results.json")).write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"concepts": out["concepts"], "results": out["results"],
                       "validator_identical": validator_ok,
                       "whole_number_floats": len(whole_floats),
+                      "dates_option": canon.DATES,
+                      "yaml11_view_changes_total": out["yaml11_view_changes_total"],
                       "already_canonical": out["diagnostic_already_canonical"]}, indent=1))
 
 

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import os
 import re
 import sys
 from decimal import Decimal
@@ -118,6 +119,9 @@ def ordered_keys(m: dict, role: str | None) -> list:
 
 TS_KEYS = {"at", "stale_after", "last_modified", "from", "to"}
 TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$")
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# E13b: "keys" (option A, CANONICAL.md §5 as first run) or "shape" (option B: any ISO date or datetime)
+DATES = os.environ.get("AIXF_CANON_DATES", "shape")   # "shape" adopted in E13b
 RESERVED = {"null", "true", "false", "yes", "no", "y", "n", "on", "off"}
 
 
@@ -189,7 +193,9 @@ def scalar(v, key=None) -> str:
             return str(int(v))
         return js_number(v)
     s = str(v)
-    if key in TS_KEYS and TS_RE.match(s):
+    if DATES == "shape" and (TS_RE.match(s) or DATE_RE.match(s)):
+        return s
+    if DATES == "keys" and key in TS_KEYS and TS_RE.match(s):
         return s
     return s if plain_safe(s) else double_quote(s)
 

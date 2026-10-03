@@ -58,6 +58,9 @@ function orderedKeys(m: Mapping, role: string | null): string[] {
 
 const TS_KEYS = new Set(["at", "stale_after", "last_modified", "from", "to"]);
 const TS_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+// E13b: "keys" (option A, CANONICAL.md §5 as first run) or "shape" (option B: any ISO date or datetime)
+const DATES = process.env.AIXF_CANON_DATES ?? "shape"; // "shape" adopted in E13b
 const RESERVED = new Set(["null", "true", "false", "yes", "no", "y", "n", "on", "off"]);
 
 function plainSafe(s: string): boolean {
@@ -94,7 +97,8 @@ function scalar(v: Value, key?: string): string {
     return String(v); // ECMAScript Number.prototype.toString; integral values below 1e21 print as integers
   }
   const s = String(v);
-  if (key !== undefined && TS_KEYS.has(key) && TS_RE.test(s)) return s;
+  if (DATES === "shape" && (TS_RE.test(s) || DATE_RE.test(s))) return s;
+  if (DATES === "keys" && key !== undefined && TS_KEYS.has(key) && TS_RE.test(s)) return s;
   return plainSafe(s) ? s : doubleQuote(s);
 }
 

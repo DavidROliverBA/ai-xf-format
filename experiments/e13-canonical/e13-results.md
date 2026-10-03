@@ -70,3 +70,36 @@ regenerate files and for any system that stores concepts as fields, with
 `CANONICAL.md` as the normative text. Before that, settle the date-only
 question above, and add Longview's export to the corpus (`E13_LONGVIEW=1`) so
 the second real producer is measured too.
+
+## E13b: which dates stay plain, and Longview added
+
+**2026-10-03.** Pre-registered in `PLAN.md` (`8b7cd51`) before its run. Both
+options were run on the first corpus **plus Longview's export** (76 concepts
+from its mock eval-day fixture on a throwaway database): 268 concepts, five
+producers. Numbers in `results-e13b-keys.json` and `results-e13b-shape.json`;
+the first run's `results.json` is option A on 192 concepts.
+
+| | Option A: five timestamp keys | Option B: any date or datetime shape |
+|---|---|---|
+| H1–H6 | all 100% (268 / 268; H5a 2,144 / 2,144; H5b 1,069 / 1,069) | all 100%, same counts |
+| Validator findings before and after | identical, 20 comparisons | identical |
+| Values a YAML 1.1 reader sees differently, original → canonical | **411** | **409** |
+| … from the vault exporter's quoted timestamps (string → datetime) | 407 | 407 |
+| … from KnowledgeX's unquoted `created:` dates (date → string) | 4 | 0 |
+| … from Longview's quoted datetimes inside its `longview:` map (string → datetime) | 0 | 2 |
+
+**Decision, by the pre-registered rule: option B**, which `CANONICAL.md` now
+states and both implementations now default to. It changes fewer values, its rule
+needs no list of keys, and it writes every date the way OKF's own examples do.
+
+**What it showed that matters more than the choice.** Almost every change is
+the same under both options: producers that quote their timestamps (the vault
+exporter, and Longview inside its custom map) lose that quoting, so a YAML 1.1
+reader now sees datetime objects. Quoting is not in the data model, so no
+canonical form can keep every YAML 1.1 reader's view of dates. The spec text has
+to say that readers take dates and timestamps as strings, which is what OKF's
+reference implementation does since its PR #6. `CANONICAL.md` §5 now says so.
+
+**Longview** passes every hypothesis and, like every other producer, writes no
+canonical files today (0 / 76).
+

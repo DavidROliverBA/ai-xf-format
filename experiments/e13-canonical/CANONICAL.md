@@ -76,7 +76,7 @@ writer's ordering of `sources`), so the canonical form never sorts a list.
 | boolean | `true` / `false` |
 | integer | decimal digits, with `-` when negative |
 | other number | the shortest decimal that reads back as the same number, as ECMAScript's `Number.prototype.toString` writes it (so `0.5`, `1e+21`, `1e-7`); a number with no fractional part below 1e21 is written as an integer (`1.0` → `1`); infinity and not-a-number as `.inf`, `-.inf`, `.nan`; negative zero as `0` |
-| string, **timestamp** | plain when it is the value of a key named `at`, `stale_after`, `last_modified`, `from` or `to` **and** it matches `YYYY-MM-DDTHH:MM:SS` with optional fraction and `Z` or `±HH:MM`; otherwise as any other string |
+| string, **date or timestamp** | plain when it matches `YYYY-MM-DD`, or `YYYY-MM-DDTHH:MM:SS` with an optional fraction and `Z` or `±HH:MM`, under any key (adopted in E13b; the first run used a list of five keys) |
 | string, **plain-safe** | plain, without quotes |
 | any other string | double-quoted |
 
@@ -101,6 +101,14 @@ YAML 1.1 reader sees.
 `\` → `\\`, `"` → `\"`, newline → `\n`, tab → `\t`, carriage return → `\r`,
 any other character below U+0020 or U+007F → `\u` and four upper-case hex
 digits. Every other character, including all non-ASCII, is written as itself.
+
+**Readers must take dates and timestamps as strings.** The data model does not
+record whether a value was quoted, so no canonical form can keep a YAML 1.1
+reader's view of every date: E13b measured 409 values on 268 concepts that a
+YAML 1.1 reader types differently before and after, almost all of them
+timestamps a producer had quoted. A reader that resolves YAML 1.1 timestamps
+must turn them back into strings, as OKF's reference Python implementation does
+since its PR #6.
 
 ## 6. Content hash
 

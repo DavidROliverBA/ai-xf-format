@@ -230,7 +230,7 @@ The two misses (q09, q11) need a second hop that one search-then-get cannot make
 
 192 concepts from nine bundles (hand-written, the vault exporter, KnowledgeX). **All six hypotheses pass at 100%:** idempotent (192/192); meaning preserved (data model 192/192, validator findings identical in 18 bundle-and-parser comparisons, 0 whole-number floats); Python and TypeScript implementations byte-identical (192/192); a Postgres `jsonb` round trip regenerates the identical file (192/192, against E10's 0/172); the `sha256:` hash ignores 1,536/1,536 formatting-only variants and catches 767/767 single-value mutations; YAML 1.1 readers see the same values (192/192). No producer writes canonical files today (0/192), so the form is a write-time step, not an existing convention.
 
-**Open before spec text:** a date-only value under a custom key (KnowledgeX's `created: 2026-10-02`) is quoted, so a YAML 1.1 reader that saw a date in the original now sees a string; and Longview's export is not yet in the corpus. **Supports:** proposing `CANONICAL.md` and the content hash for v0.5.
+**E13b** (pre-registered, `8b7cd51`) settled the open date question and added Longview's export (268 concepts, five producers). Both options pass H1–H6 at 100%. Keeping every date or datetime shape plain (option B) changes 409 values in a YAML 1.1 reader's view against 411 for the five-key list, so B is adopted. 407 of those changes are the same either way (quoted timestamps written plain): quoting is not data, so the spec must tell readers to take dates and timestamps as strings, as OKF's reference implementation does since PR #6. **Supports:** proposing `CANONICAL.md` and the content hash for v0.5.
 
 ---
 

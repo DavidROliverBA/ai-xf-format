@@ -1,0 +1,232 @@
+{
+  "concepts": 268,
+  "files_listed": 268,
+  "results": {
+    "H1": {
+      "ok": 268,
+      "of": 268,
+      "pass": true
+    },
+    "H2": {
+      "ok": 268,
+      "of": 268,
+      "pass": true
+    },
+    "H3": {
+      "ok": 268,
+      "of": 268,
+      "pass": true
+    },
+    "H4": {
+      "ok": 268,
+      "of": 268,
+      "pass": true
+    },
+    "H5a": {
+      "ok": 2144,
+      "of": 2144,
+      "pass": true
+    },
+    "H5b": {
+      "ok": 1069,
+      "of": 1069,
+      "pass": true
+    },
+    "H6": {
+      "ok": 268,
+      "of": 268,
+      "pass": true
+    }
+  },
+  "validator_before_after": {
+    "ai-concepts-kb (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 98
+    },
+    "ai-concepts-kb (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 98
+    },
+    "e2-bundle-a (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-a (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-b (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-b (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 1
+    },
+    "e2-bundle-c (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 4
+    },
+    "e2-bundle-c (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 4
+    },
+    "examples (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "examples (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-data-eng (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-data-eng (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-household (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "fixtures-household (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "knowledgex (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 7
+    },
+    "knowledgex (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 7
+    },
+    "longview (stdlib)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "longview (pyyaml)": {
+      "identical": true,
+      "passed": true,
+      "findings": 0
+    },
+    "psychology-kb (stdlib)": {
+      "identical": true,
+      "passed": false,
+      "findings": 108
+    },
+    "psychology-kb (pyyaml)": {
+      "identical": true,
+      "passed": false,
+      "findings": 108
+    }
+  },
+  "whole_number_floats": [],
+  "dates_option": "shape",
+  "yaml11_view_changes": {
+    "ai-concepts-kb": {
+      "values": 160,
+      "concepts": 63
+    },
+    "e2-bundle-a": {
+      "values": 0,
+      "concepts": 0
+    },
+    "e2-bundle-b": {
+      "values": 0,
+      "concepts": 0
+    },
+    "e2-bundle-c": {
+      "values": 0,
+      "concepts": 0
+    },
+    "examples": {
+      "values": 0,
+      "concepts": 0
+    },
+    "fixtures-data-eng": {
+      "values": 0,
+      "concepts": 0
+    },
+    "fixtures-household": {
+      "values": 0,
+      "concepts": 0
+    },
+    "knowledgex": {
+      "values": 0,
+      "concepts": 0
+    },
+    "longview": {
+      "values": 2,
+      "concepts": 1
+    },
+    "psychology-kb": {
+      "values": 247,
+      "concepts": 102
+    }
+  },
+  "yaml11_view_changes_total": 409,
+  "variant_generator_invalid": {},
+  "failures": {},
+  "diagnostic_already_canonical": {
+    "ai-concepts-kb": {
+      "canonical": 0,
+      "of": 63
+    },
+    "e2-bundle-a": {
+      "canonical": 0,
+      "of": 2
+    },
+    "e2-bundle-b": {
+      "canonical": 0,
+      "of": 2
+    },
+    "e2-bundle-c": {
+      "canonical": 0,
+      "of": 2
+    },
+    "examples": {
+      "canonical": 0,
+      "of": 7
+    },
+    "fixtures-data-eng": {
+      "canonical": 0,
+      "of": 5
+    },
+    "fixtures-household": {
+      "canonical": 0,
+      "of": 5
+    },
+    "knowledgex": {
+      "canonical": 0,
+      "of": 4
+    },
+    "longview": {
+      "canonical": 0,
+      "of": 76
+    },
+    "psychology-kb": {
+      "canonical": 0,
+      "of": 102
+    }
+  }
+}
