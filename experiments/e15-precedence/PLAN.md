@@ -110,3 +110,10 @@ measures whether the text is precise, not whether the order is the one teams
 would choose. One independent implementer is a small sample. The comment's
 harness, where the same name lives repo-wide and in a subdirectory, maps to a
 nested bundle (f4) only loosely: a harness has one author, a federation has many.
+
+**Amendment, 2026-10-04, after the independent resolver started and before any
+result was compared.** Case c21's `from_concept` named `concepts/glossary.md`,
+which bundle `zed` does not have; its only concept is `concepts/reader.md`. c21
+is an `id` reference, so the containing concept does not affect its outcome; the
+input is corrected in `cases.json`, `cases-input.json` and the independent
+resolver's copy. Expected outcomes are unchanged.

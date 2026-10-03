@@ -391,7 +391,7 @@
    "case": "c21",
    "federation": "fixtures/f3/federation.ai-xf.yaml",
    "from_namespace": "zed",
-   "from_concept": "concepts/glossary.md",
+   "from_concept": "concepts/reader.md",
    "to": "handbook",
    "gap": 3,
    "intent": null,
