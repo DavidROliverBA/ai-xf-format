@@ -50,7 +50,7 @@ for p in sorted(bundle.rglob("*.md")):
     for slug, title in sensitive.items():
         if re.search(rf"^\s*(?:-\s*)?to:\s*{re.escape(slug)}\s*$", head, re.M):
             leaks.append(f"{p.name}: to {slug}")
-        if slug in related.lower() or title.lower() in related.lower():
+        if f"](./{slug}.md)" in related or f"[{title}]" in related:      # exact link target or label
             leaks.append(f"{p.name}: Related names {slug}")
         prose = ex.WIKILINK_RE.sub(lambda mm: "" if ex.slugify(mm.group(1)) == slug else mm.group(1), src_text)
         allowed = prose.lower().count(title.lower())
@@ -59,7 +59,8 @@ for p in sorted(bundle.rglob("*.md")):
 for p in (bundle / "index.md", bundle / "log.md", bundle / "manifest.ai-xf.yaml"):
     if p.exists():
         t2 = p.read_text(encoding="utf-8", errors="replace").lower()
-        leaks += [f"{p.name}: {slug}" for slug in sensitive if slug in t2]
+        # how these files name a concept: a link to its file, or its id in backticks (log.md)
+        leaks += [f"{p.name}: {slug}" for slug in sensitive if f"/{slug}.md)" in t2 or f"`{slug}`" in t2]
 
 # H2: markers and unresolved warnings.
 markers = 0

@@ -450,7 +450,7 @@ def collect_stats(bundle: Path, now) -> dict:
     tiers = Counter(trust_tier(fm) for fm, _ in concepts.values())
     conf = Counter()
     past_stale = no_stale = with_sources = cited = 0
-    withheld_total = verified_edges = 0
+    withheld_total = verified_edges = withheld_links = 0
     orphan_footnotes = 0
     rels = Counter()
     contradictions: dict = {}
@@ -471,13 +471,16 @@ def collect_stats(bundle: Path, now) -> dict:
                               if isinstance(s, dict) and isinstance(s.get("withheld"), int))
         verified_edges += sum(1 for ln in as_list(fm.get("links"))
                               if isinstance(ln, dict) and as_list(ln.get("verified")))
+        withheld_links += sum(int(ln["withheld"]) for ln in as_list(fm.get("links"))
+                              if isinstance(ln, dict) and isinstance(ln.get("withheld"), int)
+                              and not isinstance(ln.get("withheld"), bool))
         refs = set(FOOTNOTE_REF_RE.findall(body))
         if as_list(fm.get("sources")):
             with_sources += 1
             if refs & src_ids:
                 cited += 1
         orphan_footnotes += len(refs - src_ids) if src_ids else 0
-        links = [ln for ln in as_list(fm.get("links")) if isinstance(ln, dict)]
+        links = [ln for ln in as_list(fm.get("links")) if isinstance(ln, dict) and "withheld" not in ln]
         for ln in links:
             relv = str(ln.get("rel") or "")
             rels[relv] += 1
@@ -629,6 +632,7 @@ def collect_stats(bundle: Path, now) -> dict:
                       "sources_changed_since_verified": source_changed,
                       "changed_since_verified": content_changed},
         "withheld_sources": withheld_total,
+        "withheld_links": withheld_links,
         "verified_edges": verified_edges,
         "log": {"entries": known,
                 "update_to_creation": (round(updated / created, 2) if created else None)},
@@ -667,8 +671,9 @@ def print_stats(s: dict):
         print(f"    unindexed:       {', '.join(fr['unindexed'][:10])}"
               + (f" … (+{len(fr['unindexed']) - 10})" if len(fr["unindexed"]) > 10 else ""))
     print(f"  confidence:        {fmt(s['confidence'])}")
-    if s.get("withheld_sources") or s.get("verified_edges"):
-        print(f"  redaction/edges:   {s.get('withheld_sources', 0)} source(s) withheld, {s.get('verified_edges', 0)} edge(s) with verified events")
+    if s.get("withheld_sources") or s.get("withheld_links") or s.get("verified_edges"):
+        print(f"  redaction/edges:   {s.get('withheld_sources', 0)} source(s) and {s.get('withheld_links', 0)} link(s) "
+              f"withheld, {s.get('verified_edges', 0)} edge(s) with verified events")
     lg = s["log"]
     ratio = lg["update_to_creation"]
     print(f"  log.md:            {fmt(lg['entries'])}")
@@ -1160,6 +1165,12 @@ def validate(bundle: Path, target_level: int, federation: dict | None = None):
                 where = f"links[{idx}]"
                 if not isinstance(link, dict):
                     findings.append(Finding("error", rel, f"{where} must be a mapping with `rel` and `to`"))
+                    continue
+                if "withheld" in link:
+                    # §6.1 withheld marker (proposed v0.5, E14): a count, never a target
+                    w = link.get("withheld")
+                    if isinstance(w, bool) or not isinstance(w, int) or w < 1 or len(link) != 1:
+                        findings.append(Finding("error", rel, f"{where} `withheld` must be the sole key with a positive integer count (§6.1)"))
                     continue
                 relv = link.get("rel")
                 to = link.get("to")

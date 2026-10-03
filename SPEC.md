@@ -296,6 +296,17 @@ map:
 
 A link asserts a **directed** edge from the containing concept to `to`.
 
+**Withheld links (proposed for v0.5).** A `links` entry MAY instead be a
+**withheld marker**: the single key `withheld` with a positive integer, the
+number of links removed from this concept for a reader who may not see their
+targets. It names nothing, has no `rel` or `to`, and needs no body mirror
+(§6.4). A producer that removes links for that reason SHOULD write the marker,
+and SHOULD remove the target's name from the body too, so that a list that is
+shorter than it was never looks complete. Consumers MUST NOT treat a marker as a
+broken link. It is §7.5's source marker applied to links. Evidence: E14, where a
+vault exporter writing it removed 318 generated mentions of archived and
+confidential notes from two bundles while both still passed Level 3.
+
 ### 6.2 Relationship vocabulary
 
 AI-XF defines a **core vocabulary** of `rel` values with defined inverses.
@@ -941,7 +952,13 @@ to reject a concept. Consumers read dates and timestamps as strings, quoted or
 not (§11.1). Tested before it was written, in experiments E13 to E13d
 (pre-registered; E13c failed on numbers and E13d fixed them, after which every
 hypothesis passed on 273 concepts, including a hand-written adversarial set). Reference implementation:
-`tools/ai-xf-canon.py`. Proposed: not yet released.
+`tools/ai-xf-canon.py`.
+
+**Withheld links** (§6.1): a `links` entry may be `{withheld: n}`, a count of
+links removed for a reader who may not see their targets, naming nothing; the
+§7.5 source marker applied to links. The reference validator checks its shape
+and reports `withheld_links` in `--stats`. Tested first in experiment E14
+(pre-registered, all hypotheses passed). Proposed: not yet released.
 
 ### Changelog — v0.4.4 (2026-10-03)
 

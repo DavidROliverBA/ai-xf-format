@@ -482,5 +482,45 @@ class DeclaredRels(unittest.TestCase):
         self.assertEqual(self.non_core(root), self.non_core(root, use_pyyaml=True))
 
 
+class WithheldLinks(unittest.TestCase):
+    """E14 H5: a links entry may be a withheld marker, a positive count and nothing else (§6.1)."""
+
+    def make(self, entries: str) -> Path:
+        import tempfile
+        root = Path(tempfile.mkdtemp(prefix="ai-xf-withheld-"))
+        self.addCleanup(shutil.rmtree, root, True)
+        write_tree(root, {
+            "manifest.ai-xf.yaml": "ai-xf: \"0.4\"\nname: w\nnamespace: w\n",
+            "concepts/a.md": ("---\ntype: Concept\nid: a\nstatus: stable\nlinks:\n" + entries
+                              + "---\n\n[B](./b.md)\n"),
+            "concepts/b.md": "---\ntype: Concept\nid: b\nstatus: stable\n---\n\nx\n",
+        })
+        return root
+
+    def run_w(self, entries: str, use_pyyaml: bool = False):
+        _, d = run_validator([str(self.make(entries)), "--level", "2", "--stats", "--json"], use_pyyaml=use_pyyaml)
+        return d
+
+    def test_well_formed_marker(self):
+        d = self.run_w("  - rel: relates-to\n    to: b\n  - withheld: 3\n")
+        self.assertEqual([f for f in d["findings"] if f["file"] == "concepts/a.md"], [])
+        self.assertEqual(d["stats"]["withheld_links"], 3)
+        self.assertEqual(d["stats"]["edges"], {})          # the marker is not counted as a rel
+
+    def test_malformed_markers_are_errors(self):
+        for bad in ("  - withheld: 0\n", "  - withheld: -2\n", '  - withheld: "2"\n',
+                    "  - withheld: 2\n    note: x\n", "  - withheld: 2\n    rel: relates-to\n    to: b\n",
+                    "  - withheld: true\n"):
+            d = self.run_w(bad)
+            self.assertTrue(any("`withheld` must be the sole key" in f["message"] for f in d["findings"]), bad)
+
+    def test_parsers_agree(self):
+        if not HAS_UV:
+            self.skipTest("uv not available")
+        for e in ("  - withheld: 3\n", "  - withheld: 0\n"):
+            a, b = self.run_w(e), self.run_w(e, use_pyyaml=True)
+            self.assertEqual(normalize_bundle_field(a), normalize_bundle_field(b))
+
+
 if __name__ == "__main__":
     unittest.main()

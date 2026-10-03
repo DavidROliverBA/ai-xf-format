@@ -234,6 +234,11 @@ The two misses (q09, q11) need a second hop that one search-then-get cannot make
 
 **E13c and E13d** (pre-registered, `f4b3639`, `b265766`). Vendoring the form into Longview found a gap: NEL, U+2028, U+2029 and C1 controls written plain make a file PyYAML cannot read. With an escape rule and a hand-written adversarial set added (273 concepts), E13c **failed** on numbers alone: ECMAScript's `1e+21` and `1e-7` read as strings in YAML 1.1, and `1e21` returns from `jsonb` as an integer. E13d writes integers as digits at any size and gives exponent mantissas a decimal point: **H1–H6 all 100%** on the same 273, validator findings identical in 22 comparisons, no whole-number floats in real data. Documented limit: a float with no fractional part becomes an integer. The form is vendored into Longview.
 
+
+## E14: withheld-link marker (pre-registered)
+
+**2026-10-03.** Plan `fdcd6f1`. The vault exporter withholds links to archived, confidential or BA-bearing notes outside the export, writing `{withheld: n}` and naming the target nowhere. Generated text naming such targets: 248 → **0** (psychology) and 70 → **0** (ai-concepts); markers equal the exporter's count (96, 27) and "does not resolve" warnings fall by exactly that; both bundles still pass Level 3 under both parsers and stay 100% canonical; 3 new validator tests pass under both parsers. **All pass**: the marker is in SPEC §6.1 (proposed v0.5). The `samos` leak is closed. Detail in `e14-withheld-links/e14-results.md`.
+
 ---
 
 ## Summary and the v0.4 gate
