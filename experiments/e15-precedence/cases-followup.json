@@ -1,0 +1,69 @@
+{
+ "note": "Follow-up cases, NOT pre-registered: written after the E15 run from the independent implementer's NOTES.md, to check points the 25 cases did not exercise.",
+ "cases": [
+  {
+   "case": "x01",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "../../beta/concepts/glossary.md",
+   "why": "a path that leaves its bundle does not resolve",
+   "expected": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "x02",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "ai-xf://glossary",
+   "why": "malformed explicit form: a broken qualified reference",
+   "expected": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "x03",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "./home",
+   "why": "no .md is appended to a path",
+   "expected": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "x04",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "./home.md",
+   "why": "concept-relative path",
+   "expected": {
+    "kind": "path",
+    "target": "alpha/home",
+    "via": "path",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  }
+ ]
+}

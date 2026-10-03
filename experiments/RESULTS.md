@@ -239,6 +239,10 @@ The two misses (q09, q11) need a second hop that one search-then-get cannot make
 
 **2026-10-03.** Plan `fdcd6f1`. The vault exporter withholds links to archived, confidential or BA-bearing notes outside the export, writing `{withheld: n}` and naming the target nowhere. Generated text naming such targets: 248 → **0** (psychology) and 70 → **0** (ai-concepts); markers equal the exporter's count (96, 27) and "does not resolve" warnings fall by exactly that; both bundles still pass Level 3 under both parsers and stay 100% canonical; 3 new validator tests pass under both parsers. **All pass**: the marker is in SPEC §6.1 (v0.5). The `samos` leak is closed. Detail in `e14-withheld-links/e14-results.md`.
 
+## E15: one resolution order (pre-registered)
+
+**2026-10-04.** Plan `c7d3f0a`, prompted by a reader's comment that precedence decides federation. Five gaps where two consumers following v0.5 could disagree: own alias against another bundle's id, aliases in other bundles, "alphabetical" (Postgres's default collation disagrees with byte order), nested bundles (a duplicate-id error), and extensionless paths. One written rule, with an optional declared `precedence`. Expected outcomes, the reference validator and an independent TypeScript resolver written from the text alone agree on **25 / 25** cases; 0 silent cross-bundle resolutions; validator output unchanged on all 8 existing bundles under both parsers; the nested bundle passes. **All pass**: proposed for v0.6 in SPEC §6.1, §9.1, §9.2, §9.5, §11.1. The independent implementer also found that the fixtures were invalid YAML that the validator's fallback parser had accepted, a parser-agreement defect not yet fixed. Detail in `e15-precedence/e15-results.md`.
+
 ---
 
 ## Summary and the v0.4 gate

@@ -1,0 +1,37 @@
+{
+ "H1_agree": "25/25",
+ "H1_disagreements": [],
+ "H2_silent_cross_bundle": [],
+ "H3_changed_corpus_entries": [],
+ "H3_suites": {
+  "e2_unittest_stdlib": true,
+  "e2_unittest_pyyaml": true,
+  "e2_run_sh": true,
+  "examples_level3_clean": true,
+  "e2_baseline_unchanged": true
+ },
+ "H4_nesting": {
+  "outer_stdlib": {
+   "passed": true,
+   "duplicate_id_findings": 0
+  },
+  "outer_pyyaml": {
+   "passed": true,
+   "duplicate_id_findings": 0
+  },
+  "team_stdlib": {
+   "passed": true,
+   "duplicate_id_findings": 0
+  },
+  "team_pyyaml": {
+   "passed": true,
+   "duplicate_id_findings": 0
+  }
+ },
+ "H5_resolve_parser_diffs": [],
+ "H5_corpus_parser_diffs": [],
+ "step4_misresolved_against_intent": [],
+ "step4_gained_intended": [
+  "c05"
+ ]
+}

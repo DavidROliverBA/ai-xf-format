@@ -1,0 +1,312 @@
+{
+ "cases": [
+  {
+   "case": "c01",
+   "result": {
+    "kind": "id",
+    "target": "alpha/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c02",
+   "result": {
+    "kind": "id",
+    "target": "alpha/renamed",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c03",
+   "result": {
+    "kind": "id",
+    "target": "beta/beta-only",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c04",
+   "result": {
+    "kind": "id",
+    "target": "beta/beta-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta",
+     "gamma"
+    ]
+   }
+  },
+  {
+   "case": "c05",
+   "result": {
+    "kind": "id",
+    "target": "alpha/legacy-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "alpha"
+    ]
+   }
+  },
+  {
+   "case": "c06",
+   "result": {
+    "kind": "id",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c07",
+   "result": {
+    "kind": "qualified",
+    "target": "beta/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c08",
+   "result": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": false,
+    "error": true,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c09",
+   "result": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c10",
+   "result": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c11",
+   "result": {
+    "kind": "id",
+    "target": "beta/old-name",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c12",
+   "result": {
+    "kind": "id",
+    "target": "beta/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c13",
+   "result": {
+    "kind": "id",
+    "target": "gamma/gamma-only",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "gamma"
+    ]
+   }
+  },
+  {
+   "case": "c14",
+   "result": {
+    "kind": "id",
+    "target": "beta/shared-x",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta",
+     "gamma"
+    ]
+   }
+  },
+  {
+   "case": "c15",
+   "result": {
+    "kind": "qualified",
+    "target": "beta/beta-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c16",
+   "result": {
+    "kind": "id",
+    "target": "gamma/shared-x",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "gamma",
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c17",
+   "result": {
+    "kind": "id",
+    "target": "alpha/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c18",
+   "result": {
+    "kind": "id",
+    "target": "beta/common",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c19",
+   "result": {
+    "kind": "id",
+    "target": "beta/common",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c20",
+   "result": {
+    "kind": "id",
+    "target": "gamma/gamma-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "gamma",
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c21",
+   "result": {
+    "kind": "id",
+    "target": "team-b/handbook",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "team-b",
+     "teama"
+    ]
+   }
+  },
+  {
+   "case": "c22",
+   "result": {
+    "kind": "id",
+    "target": "outer/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c23",
+   "result": {
+    "kind": "id",
+    "target": "team/runbook",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "team"
+    ]
+   }
+  },
+  {
+   "case": "c24",
+   "result": {
+    "kind": "id",
+    "target": "outer/glossary",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "outer"
+    ]
+   }
+  },
+  {
+   "case": "c25",
+   "result": {
+    "kind": "id",
+    "target": "outer/policy",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "outer"
+    ]
+   }
+  }
+ ]
+}

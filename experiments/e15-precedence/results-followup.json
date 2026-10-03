@@ -1,0 +1,84 @@
+{
+ "cases": [
+  {
+   "case": "x01",
+   "agree": true,
+   "validator": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   },
+   "independent": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "x02",
+   "agree": true,
+   "validator": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   },
+   "independent": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "x03",
+   "agree": true,
+   "validator": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   },
+   "independent": {
+    "kind": "path",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "x04",
+   "agree": true,
+   "validator": {
+    "kind": "path",
+    "target": "alpha/home",
+    "via": "path",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   },
+   "independent": {
+    "kind": "path",
+    "target": "alpha/home",
+    "via": "path",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  }
+ ]
+}

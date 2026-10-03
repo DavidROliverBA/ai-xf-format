@@ -235,6 +235,11 @@ be a superset of OKF; AI-XF is that superset written down.
   independent implementations byte-identical on 273 concepts from five
   producers and an adversarial set; E14: withheld targets named 0 times, from
   318).
+- **v0.6** (proposed, 2026-10-04): one resolution order for every consumer.
+  Aliases, byte order, nested bundles and path syntax written down exactly, plus
+  an optional declared `precedence`; prompted by a reader's comment. E15: an
+  independent implementation written from the text alone agreed on 25 of 25
+  cases.
 
 ## Naming
 

@@ -296,6 +296,16 @@ map:
 
 A link asserts a **directed** edge from the containing concept to `to`.
 
+**Reading a `to` value (v0.6, proposed).** Consumers classify `to` by its text
+alone, never by which bundles they hold. The first rule that matches decides:
+a value starting `ai-xf://` is a qualified reference (§9.2); a value ending in
+`.md`, or starting `./` or `../`, is a path; a value of the form `namespace/id`
+is a qualified reference; anything else is an `id`. A path resolves inside the
+containing bundle only, relative first to the concept's directory and then to
+the bundle root; it never leaves the bundle, and no extension is added to it.
+Producers SHOULD therefore write paths with their `.md` extension: without it,
+`concepts/home` is read as the concept `home` in namespace `concepts`.
+
 **Withheld links.** A `links` entry MAY instead be a
 **withheld marker**: the single key `withheld` with a positive integer, the
 number of links removed from this concept for a reader who may not see their
@@ -617,6 +627,14 @@ manifest (§10.3): a lowercase kebab-case string, unique within the federation,
 stable for the life of the bundle. The namespace is an identifier, not a path;
 renaming it breaks every inbound reference, exactly like renaming an `id`.
 
+**Nested bundles (v0.6, proposed).** A directory below a bundle's root that holds
+its own `manifest.ai-xf.yaml` is the root of a separate bundle. It and everything
+under it are not part of the enclosing bundle: its concepts' ids, aliases and
+paths belong to the inner bundle only, whether or not a consumer holds it. A team
+can therefore keep its own bundle inside a department's repository, and define
+an id the department also defines, without a collision; references between the
+two are cross-bundle references, resolved like any other (§9.2).
+
 ### 9.2 Qualified references
 
 A `to` value containing a `/` is a **federation-qualified reference**:
@@ -649,23 +667,50 @@ typed link.
 See the [orders event stream](ai-xf://data-eng/orders-events).
 ```
 
-**Resolution of unqualified references in a federation (v0.4).** A consumer
-holding several bundles resolves an unqualified `to: <id>` as follows:
+**Resolution in a federation (v0.4; order made exact in v0.6, proposed).** A
+consumer holding several bundles resolves a link from a concept in the
+*containing bundle* as follows.
 
-1. In the containing bundle. If found, resolution is silent and final, even if
-   other held bundles also define that `id`.
-2. Otherwise, in the other held bundles in alphabetical order of namespace.
-   The first match wins, **and the consumer MUST emit a warning** that names
-   every namespace in which the `id` was found and the one chosen, and
-   recommends qualifying the reference. Resolution across a bundle boundary is
-   never silent.
-3. Otherwise, a tolerable broken link (§11.1).
+A **qualified** reference `namespace/id` resolves in the named bundle only: by
+`id`, then by an `aliases` match (with a warning to link to the `id`). It is a
+tolerable broken link (§11.1) if neither matches or the namespace is not held. A
+reference qualified with the containing bundle's own namespace is an error.
 
-A reference resolved by step 2 is a cross-bundle reference for the purposes of
-§6.4 (mirroring is SHOULD, not MUST). This is the rule established by the Foam
-knowledge tool for multi-root workspaces; it was adopted after experiment E2
-showed it produces zero silent misresolutions on deliberately colliding
-fixtures.
+An **`id`** reference resolves at the first step that matches:
+
+1. A concept in the containing bundle with that `id`. Silent and final, even if
+   other held bundles also define it.
+2. A concept in the containing bundle with that alias, with a warning to link to
+   its `id` (§6.6).
+3. A concept with that `id` in the other held bundles, tried in **federation
+   order**. The first bundle that has one wins, and the consumer **MUST emit a
+   warning** that names every namespace where the `id` was found, in federation
+   order, and the one chosen, and recommends qualifying the reference.
+4. A concept with that alias in the other held bundles, in federation order, as
+   step 3.
+5. Otherwise a tolerable broken link (§11.1).
+
+**Federation order** is the namespaces listed in the federation manifest's
+optional `precedence` (§9.5), in the order listed, skipping any the federation
+does not hold and the containing bundle's own; then every other held namespace
+in ascending order of its UTF-8 bytes. Byte order is deliberate: a locale's
+collation is not stable across systems (Postgres's default `en_US.utf8` sorts
+`teama` before `team-b`; byte order sorts them the other way).
+
+Steps 3 and 4 are never silent. A collision between bundles is a reason to
+qualify the reference, not a feature: the bundles usually have different owners,
+and a silent override would let one team take over another team's name. A
+consumer that wants one bundle to win declares it in `precedence`, where a
+reviewer can see it.
+
+A reference resolved by steps 3 or 4 is a cross-bundle reference for the
+purposes of §6.4 (mirroring is SHOULD, not MUST). Steps 1 and 3 are the rule
+established by the Foam knowledge tool for multi-root workspaces, adopted after
+experiment E2 showed it produces zero silent misresolutions on deliberately
+colliding fixtures. The exact order, aliases, byte order, `precedence` and
+nested bundles were added after experiment E15: written as one rule, an
+independent implementation built from the text alone resolved all 25 test
+cases exactly as the reference validator did.
 
 ### 9.3 Shared vocabularies
 
@@ -729,6 +774,10 @@ bundles:
   repository that holds it; `path` (path sources) is relative to the federation
   manifest. Both point at the directory containing `manifest.ai-xf.yaml`.
 - Two entries MUST NOT share a `namespace`.
+- `precedence` (optional, v0.6 proposed) is a list of namespaces that are tried
+  first, in the listed order, when an unqualified reference is not found in its
+  own bundle (§9.2). It MUST NOT name a namespace twice; a consumer keeps the
+  first occurrence. Names the federation does not hold are ignored.
 - `ref` and `digest` are strings. Quote a short git SHA that happens to be all
   digits (`ref: "1408535"`), or a YAML parser will read it as a number.
 
@@ -894,9 +943,10 @@ A conformant consumer:
   written, a concept removed without a tombstone, or a bundle the consumer
   does not hold; a consumer MUST NOT report which of these it is unless the
   bundle says so (a tombstone, §6.6).
-- SHOULD resolve link targets by `id` first, then by bundle-relative path,
-  then by an `aliases` match (§6.6); qualified references resolve by
-  namespace first (§9.2).
+- SHOULD classify a link's `to` by its text (§6.1) and resolve it in the
+  order of §9.2: in the containing bundle by `id`, path or alias; then in the
+  other held bundles in federation order, by `id` and then by alias, always with
+  a warning. Qualified references resolve in the named bundle only.
 - SHOULD synthesise inverse edges (§6.3).
 - MUST preserve unknown keys when round-tripping a document.
 - MUST tolerate v0.1-generation fields per the mapping in §7.3.
@@ -941,6 +991,24 @@ their own sanitisation before publishing a bundle — and SHOULD remember that
 Bundles declare the version they target via `manifest.ai-xf.yaml`'s `ai-xf` key.
 Minor versions remain readable by earlier consumers under the permissive rules
 of §11.1.
+
+### Changelog — v0.6 (proposed, 2026-10-04)
+
+**One resolution order for every consumer** (§6.1, §9.1, §9.2, §9.5, §11.1).
+Prompted by a reader's comment that precedence is where federation is decided.
+Five places where two consumers following the v0.5 text could resolve the same
+reference differently are now fixed: the containing bundle's aliases come
+before other bundles' ids; other bundles' aliases are tried last, with a
+warning; "alphabetical" is UTF-8 byte order, not a locale's collation; a bundle
+nested in another's directory is a separate bundle, not a duplicate-id error;
+and a `to` value is classified by its text alone, so a path is one that ends in
+`.md` or starts `./` or `../`. A federation manifest MAY declare `precedence`, an
+explicit order that replaces byte order. Tested first in experiment E15
+(pre-registered): the reference validator and an independent TypeScript
+resolver written from the rule text alone agreed with the expected outcome on
+25 of 25 cases; no cross-bundle resolution was silent; validator findings on
+every existing bundle were unchanged. Backward compatible: every v0.5 bundle
+resolves as before unless it relies on one of the five gaps.
 
 ### Changelog — v0.5 (2026-10-03)
 

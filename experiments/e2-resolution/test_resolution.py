@@ -522,5 +522,47 @@ class WithheldLinks(unittest.TestCase):
             self.assertEqual(normalize_bundle_field(a), normalize_bundle_field(b))
 
 
+class PrecedenceAndNesting(unittest.TestCase):
+    """E15: one resolution order (§6.1, §9.1, §9.2, §9.5), checked through --resolve on E15's fixtures."""
+
+    E15 = REPO_ROOT / "experiments" / "e15-precedence"
+
+    def resolve(self, fed: str, ns: str, to: str, concept: str = "concepts/glossary.md", use_pyyaml: bool = False) -> dict:
+        args = [str(self.E15 / "fixtures" / fed / "federation.ai-xf.yaml"), "--resolve", ns, concept, to]
+        pre = ["uv", "run", "-q", "--with", "pyyaml", "python3"] if use_pyyaml else [sys.executable]
+        proc = subprocess.run(pre + [str(VALIDATOR), *args], capture_output=True, text=True)
+        return json.loads(proc.stdout)
+
+    def test_every_e15_case(self):
+        cases = json.loads((self.E15 / "cases.json").read_text())["cases"]
+        for c in cases:
+            fed = c["federation"].split("/")[1]
+            got = self.resolve(fed, c["from_namespace"], c["to"], c["from_concept"])
+            self.assertEqual(got, c["expected"], c["case"])
+
+    def test_own_alias_beats_other_bundles_id(self):
+        self.assertEqual(self.resolve("f1", "alpha", "old-name")["target"], "alpha/renamed")
+
+    def test_declared_precedence_then_byte_order(self):
+        self.assertEqual(self.resolve("f2", "alpha", "shared-x")["candidates"], ["gamma", "beta"])
+        self.assertEqual(self.resolve("f3", "zed", "handbook", "concepts/reader.md")["target"], "team-b/handbook")
+
+    def test_nested_bundle_is_a_boundary(self):
+        _, d = run_validator([str(self.E15 / "fixtures/f4/outer"), "--level", "2", "--json"])
+        self.assertTrue(d["passed"])
+        self.assertFalse(any("duplicate id" in f["message"] for f in d["findings"]))
+        self.assertEqual(self.resolve("f4", "outer", "runbook")["target"], "team/runbook")
+
+    def test_paths_stay_in_their_bundle(self):
+        self.assertIsNone(self.resolve("f1", "alpha", "../../beta/concepts/glossary.md")["target"])
+        self.assertEqual(self.resolve("f1", "alpha", "ai-xf://glossary")["kind"], "qualified")
+
+    def test_parsers_agree(self):
+        if not HAS_UV:
+            self.skipTest("uv not available")
+        for fed, ns, to in (("f1", "alpha", "nickname"), ("f2", "gamma", "common"), ("f4", "team", "policy")):
+            self.assertEqual(self.resolve(fed, ns, to), self.resolve(fed, ns, to, use_pyyaml=True))
+
+
 if __name__ == "__main__":
     unittest.main()

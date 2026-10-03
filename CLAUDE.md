@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 AI-XF is a **specification** rather than an application: a markdown + YAML-frontmatter format for curated knowledge bundles, defined as a strict superset of Google's Open Knowledge Format (OKF) v0.2. The deliverables are documents, a reference validator and evidence:
 
-- `SPEC.md`: the normative spec (v0.4 draft). The changelog is in §13.
+- `SPEC.md`: the normative spec (v0.5 released, v0.6 proposed). The changelog is in §13.
 - `CURATOR.md`: non-normative curation policy.
 - `examples/`: the worked bundle. It must pass at Level 3, and it doubles as the `payments` namespace in the experiments.
-- `tools/ai-xf-validate.py`: the reference validator and the only real code.
-- `experiments/`: runnable evidence (E1–E7) behind the v0.4 federation rules, summarised in `experiments/RESULTS.md`.
+- `tools/ai-xf-validate.py`: the reference validator. `tools/ai-xf-canon.py` is the reference canonicaliser (SPEC §5.7, Appendix D; needs PyYAML).
+- `experiments/`: runnable, mostly pre-registered evidence (E1–E15) behind each rule, summarised in `experiments/RESULTS.md`.
 
 ## Commands
 
@@ -25,8 +25,10 @@ cd experiments/e2-resolution && python3 -m unittest test_resolution.FederationRe
 
 experiments/e2-resolution/run.sh     # full E2 run, including the stdlib-vs-PyYAML diff and the examples/ baseline check
 
-uv run --with pyyaml python3 tools/ai-xf-canon.py check examples/   # canonical form (SPEC §5.7, proposed v0.5)
+uv run --with pyyaml python3 tools/ai-xf-canon.py check examples/   # canonical form (SPEC §5.7)
 experiments/e13-canonical/run.sh     # E13: both canonical implementations, H1-H6 (E13_LONGVIEW=1 adds Longview)
+python3 tools/ai-xf-validate.py <federation.ai-xf.yaml> --resolve <ns> <concept> <to>   # explain one resolution (E15)
+experiments/e15-precedence/run.sh    # E15: resolution order, three-way agreement
 ```
 
 Each experiment directory has its own `run.sh`. Some need external tools: `uv`, qmd (E3), an MCP client (E4), ORAS + Cosign (E6), MyVault's exporter (E8) and bun for `bunx knowledgex` (E9). Scratch output goes to `/tmp` or gitignored paths.
@@ -37,7 +39,7 @@ Each experiment directory has its own `run.sh`. Some need external tools: `uv`, 
 
 The structure follows the conformance ladder (Level 0 OKF-compatible → 1 Core → 2 Full → 3 Federated). `validate()` accumulates `Finding`s (error or warning) at or below the target level. `collect_stats()` provides `--stats`, which reports curation health and **never affects pass/fail**. `load_federation()` builds a namespace → id index across the bundles listed in a `federation.ai-xf.yaml`. `source: git` entries resolve as local paths relative to the repo root, and the validator never fetches anything. The vocabularies (`CORE_RELS`, `REL_INVERSES`, `LINK_STATES`, `OUTCOMES`, `LOG_WORDS`, `OKF_TRUST_FIELDS`, …) are module-level constants and must stay in step with `SPEC.md` §6, §7 and §10.
 
-Federation resolution rule (SPEC §9.2): the bundle's own namespace is tried first, then other namespaces alphabetically. A cross-bundle resolution always produces a warning and is never silent. A reference qualified with the bundle's own namespace is an error.
+Federation resolution rule (SPEC §9.2, exact since E15): `classify_to` reads a `to` by its text (path = ends `.md` or starts `./`/`../`); `resolve_ref` is the one order, used by link checking and `--resolve`: own id, own alias, then other bundles' ids, then their aliases, in federation order (declared `precedence`, then byte order). A cross-bundle resolution always warns. A reference qualified with the bundle's own namespace is an error. A directory with its own manifest is a separate bundle (`bundle_rglob` skips it). Known defect: the fallback parser accepts a plain scalar containing `": "`, which PyYAML rejects; quote such values in fixtures.
 
 ## Rules for changing the spec
 

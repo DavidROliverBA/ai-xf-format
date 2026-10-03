@@ -435,7 +435,7 @@ def collect_stats(bundle: Path, now) -> dict:
     now = to_instant(now)
     concepts = {}
     paths = {}
-    for p in sorted(bundle.rglob("*.md")):
+    for p in sorted(bundle_rglob(bundle, "*.md")):
         if p.name in RESERVED_MD:
             continue
         fm, _err, body = parse_concept(p)
@@ -503,7 +503,7 @@ def collect_stats(bundle: Path, now) -> dict:
     # Freshness (E8). A concept file no index.md lists was not written by the
     # producer that regenerated the index: a ghost of an earlier export, or never
     # indexed. Only meaningful when the bundle has an index at all.
-    indexes = sorted(bundle.rglob("index.md"))
+    indexes = sorted(bundle_rglob(bundle, "index.md"))
     unindexed = None
     if indexes:
         listed = set()
@@ -575,7 +575,7 @@ def collect_stats(bundle: Path, now) -> dict:
 
     cstate = Counter(contradictions.values())
     log_words = Counter()
-    for lp in bundle.rglob("log.md"):
+    for lp in bundle_rglob(bundle, "log.md"):
         log_words.update(LOG_ENTRY_RE.findall(lp.read_text(encoding="utf-8")))
     known = {w: log_words.get(w, 0) for w in LOG_WORDS if log_words.get(w)}
     created, updated = log_words.get("Creation", 0), log_words.get("Update", 0)
@@ -721,6 +721,121 @@ def qualified_parts(to: str):
     return None
 
 
+def classify_to(to: str):
+    """Classify a link's `to` by its text alone (§6.1, §9.2; E15): ("qualified", ns, id, explicit),
+    ("path",) or ("id",). A path ends in `.md` or starts with `./` or `../`, so an extensionless
+    `concepts/home` reads as namespace `concepts`, id `home`."""
+    q = qualified_parts(to)
+    if q is not None and q[2]:
+        return ("qualified", *q)
+    if to.startswith(("ai-xf://", *LEGACY_SCHEMES)):
+        return ("qualified", None, None, True)     # explicit but malformed: a broken qualified reference
+    if to.endswith(".md") or to.startswith(("./", "../")):
+        return ("path",)
+    if q is not None:
+        return ("qualified", *q)
+    return ("id",)
+
+
+def is_bundle_root(d: Path) -> bool:
+    return any((d / n).exists() for n in (MANIFEST_NAME, *LEGACY_MANIFEST_NAMES))
+
+
+def in_nested_bundle(root: Path, path: Path) -> bool:
+    """True if `path` lies in a separate bundle nested below `root`: a directory between them
+    holds its own manifest (§9.1, E15)."""
+    try:
+        parts = path.resolve().relative_to(root.resolve()).parts[:-1]
+    except ValueError:
+        return False
+    d = root.resolve()
+    for part in parts:
+        d = d / part
+        if is_bundle_root(d):
+            return True
+    return False
+
+
+def bundle_rglob(root: Path, pattern: str):
+    """`root.rglob(pattern)` without the files of bundles nested below `root` (§9.1, E15)."""
+    nested: dict[Path, bool] = {}
+    for p in root.rglob(pattern):
+        d, hit = root, False
+        for part in p.relative_to(root).parts[:-1]:
+            d = d / part
+            if d not in nested:
+                nested[d] = is_bundle_root(d)
+            if nested[d]:
+                hit = True
+                break
+        if not hit:
+            yield p
+
+
+def federation_order(federation: dict, own_ns) -> list[str]:
+    """The other held namespaces in resolution order: the declared `precedence` first, then
+    UTF-8 byte order, which is code-point order, not a locale's collation (§9.2, E15)."""
+    held = [ns for ns in federation["index"] if ns != own_ns]
+    first = []
+    for ns in federation.get("precedence") or []:
+        if ns in held and ns not in first:
+            first.append(ns)
+    return first + sorted(ns for ns in held if ns not in first)
+
+
+def resolve_ref(to: str, own_ns, concept: Path, bundle: Path, own_ids: dict, own_paths: dict,
+                own_aliases: dict, federation: dict | None) -> dict:
+    """The one resolution order (§9.2, §11.1; E15). `own_ids`: id -> anything; `own_paths`:
+    resolved concept path -> id; `own_aliases`: alias -> id. Returns the E15 interface fields
+    plus `step` and `explicit`. Link checking and --resolve both call this."""
+    out = {"kind": None, "target": None, "via": None, "warning": False, "error": False,
+           "candidates": [], "step": "broken", "explicit": False}
+    c = classify_to(to)
+    out["kind"] = c[0]
+    q = (lambda cid: f"{own_ns}/{cid}" if own_ns else cid)
+
+    def done(step, target=None, via=None, warning=False, error=False, candidates=()):
+        out.update(step=step, target=target, via=via, warning=warning, error=error, candidates=list(candidates))
+        return out
+
+    if c[0] == "qualified":
+        ns, cid, out["explicit"] = c[1], c[2], c[3]
+        if ns is None:
+            return done("qualified-broken", warning=True)
+        if federation is None:
+            return done("qualified-unheld", warning=True)
+        if own_ns and ns == own_ns:
+            return done("self-qualified", error=True)
+        if cid in federation["index"].get(ns, {}):
+            return done("qualified", f"{ns}/{cid}", "id")
+        via = federation.get("aliases", {}).get(ns, {}).get(cid)
+        if via:
+            return done("qualified-alias", f"{ns}/{via}", "alias", warning=True)
+        return done("qualified-broken", warning=True)
+    if c[0] == "path":
+        root = bundle.resolve()
+        for cand in (concept.parent / to, bundle / to):
+            inside = cand.resolve().is_relative_to(root)      # a path never leaves its bundle
+            if inside and cand.is_file() and not in_nested_bundle(bundle, cand):
+                hit = own_paths.get(cand.resolve())
+                return done("own-path", q(hit) if hit else None, "path" if hit else None)
+        return done("broken", warning=True)
+    if to in own_ids:
+        return done("own-id", q(to), "id")
+    if to in own_aliases:
+        return done("own-alias", q(own_aliases[to]), "alias", warning=True)
+    if federation is not None:
+        order = federation_order(federation, own_ns)
+        hits = [ns for ns in order if to in federation["index"][ns]]
+        if hits:
+            return done("other-id", f"{hits[0]}/{to}", "id", warning=True, candidates=hits)
+        hits = [ns for ns in order if to in federation.get("aliases", {}).get(ns, {})]
+        if hits:
+            return done("other-alias", f"{hits[0]}/{federation['aliases'][hits[0]][to]}", "alias",
+                        warning=True, candidates=hits)
+    return done("broken", warning=True)
+
+
 def find_repo_root(start: Path) -> Path | None:
     """Walk upward from `start` looking for a `.git` directory."""
     cur = start.resolve()
@@ -735,7 +850,7 @@ def scan_bundle_aliases(bundle_root: Path) -> dict[str, str]:
     that is also an id in the bundle never shadows that id."""
     ids, out = set(), {}
     entries = []
-    for p in sorted(bundle_root.rglob("*.md")):
+    for p in sorted(bundle_rglob(bundle_root, "*.md")):
         if p.name in RESERVED_MD:
             continue
         fm, _err, _body = parse_concept(p)
@@ -755,7 +870,7 @@ def scan_bundle_ids(bundle_root: Path) -> dict[str, Path]:
     they are simply not addressable federation-wide (SPEC §5.2 makes `id`
     the preferred link target; a path-only concept can't be a fed target)."""
     ids: dict[str, Path] = {}
-    for p in sorted(bundle_root.rglob("*.md")):
+    for p in sorted(bundle_rglob(bundle_root, "*.md")):
         if p.name in RESERVED_MD:
             continue
         fm, _err, _body = parse_concept(p)
@@ -897,8 +1012,26 @@ def load_federation(fed_path: Path):
             except Exception:  # noqa: BLE001
                 pass  # not JSON of the {"version","values":[{"name"}]} shape — informational only
 
+    # §9.2 (E15): an optional declared order for resolving unqualified references, which
+    # replaces byte order for the namespaces it lists.
+    precedence: list[str] = []
+    if man.get("precedence") is not None:
+        if not isinstance(man.get("precedence"), list):
+            findings.append(Finding("error", fed_label, "`precedence` must be a list of namespaces"))
+        else:
+            for ns in man["precedence"]:
+                ns = str(ns)
+                if ns in precedence:
+                    findings.append(Finding("error", fed_label, f"`precedence` names `{ns}` twice"))
+                    continue
+                if ns not in index:
+                    findings.append(Finding("warning", fed_label, f"`precedence` names `{ns}`, which this federation does not hold (ignored)"))
+                precedence.append(ns)
+
     federation = {"index": index, "aliases": aliases, "namespaces": namespaces_seen,
-                  "vocab_types": vocab_types, "vocab_rels": vocab_rels}
+                  "vocab_types": vocab_types, "vocab_rels": vocab_rels, "precedence": precedence,
+                  "roots": {b["namespace"]: Path(b["root"]) for b in bundle_reports
+                            if not str(b["root"]).startswith("(")}}
     return federation, findings, bundle_reports
 
 
@@ -911,7 +1044,7 @@ def federation_stats(federation: dict, bundle_reports: list[dict], bundle: Path 
     retired: set[str] = set()        # "ns/id" of deprecated concepts with no successor
     for b in bundle_reports:
         root = Path(b["root"])
-        for p in sorted(root.rglob("*.md")):
+        for p in sorted(bundle_rglob(root, "*.md")):
             if p.name in RESERVED_MD:
                 continue
             fm, _err, _body = parse_concept(p)
@@ -939,7 +1072,7 @@ def federation_stats(federation: dict, bundle_reports: list[dict], bundle: Path 
     }
     cross_retired = 0
     if bundle is not None:
-        for p in sorted(bundle.rglob("*.md")):
+        for p in sorted(bundle_rglob(bundle, "*.md")):
             if p.name in RESERVED_MD:
                 continue
             fm, _err, _body = parse_concept(p)
@@ -1003,7 +1136,7 @@ def validate(bundle: Path, target_level: int, federation: dict | None = None):
     concepts = []
     ids: dict[str, str] = {}
 
-    md_files = [p for p in bundle.rglob("*.md") if p.name not in RESERVED_MD]
+    md_files = [p for p in bundle_rglob(bundle, "*.md") if p.name not in RESERVED_MD]
 
     # First pass: parse + collect ids (Level 0 + id collection)
     parsed = {}
@@ -1203,19 +1336,16 @@ def validate(bundle: Path, target_level: int, federation: dict | None = None):
                     findings.append(Finding("error", rel, f"{where} missing `to`"))
                     continue
                 to = str(to)
+                r = resolve_ref(to, own_ns, p, bundle, ids, path_to_id, alias_to_id, federation)
+                step, via = r["step"], None
+                if r["step"] in ("own-alias", "other-alias", "qualified-alias"):
+                    via = r["target"].split("/", 1)[1] if (r["target"] and (own_ns or step != "own-alias")) else r["target"]
                 if federation is None:
-                    # resolve: id, or a path resolving to a known file
-                    resolved = to in ids
-                    if not resolved:     # a path: concept-relative, or bundle-relative (§6.1)
-                        resolved = (p.parent / to).exists() or (bundle / to).exists()
-                    # federation-qualified reference (SPEC §9.2): namespace/id,
-                    # not resolvable as a same-bundle path — tolerated, no mirror rule
-                    if not resolved and QUALIFIED_RE.match(to) and to not in ids:
-                        continue
-                    via = None if resolved else alias_to_id.get(to)
-                    if via:
+                    if step == "qualified-unheld" and not r["explicit"]:
+                        continue     # federation-qualified (§9.2), not held here: tolerated, no mirror rule
+                    if step == "own-alias":
                         findings.append(Finding("warning", rel, f"{where} `to: {to}` resolves only as an alias of `{via}` (§6.6) — link to `{via}`"))
-                    elif not resolved:
+                    elif step not in ("own-id", "own-path"):
                         findings.append(Finding("warning", rel, f"{where} `to: {to}` does not resolve (tolerated: not in this bundle, by id, path or alias)"))
                     # body-link mirroring (same-bundle targets only)
                     mirrored = to in btargets or Path(to).stem in btargets or path_id(p, to) in btargets \
@@ -1224,55 +1354,52 @@ def validate(bundle: Path, target_level: int, federation: dict | None = None):
                         findings.append(Finding("error", rel, f"{where} `to: {to}` not mirrored by a body markdown link (OKF-compat rule)"))
                     continue
 
-                # --federation: qualified (`namespace/id` or the explicit
-                # `ai-xf://namespace/id`, SPEC §9.2 + NEW) references resolve
-                # against the federation-wide index. An unqualified reference
-                # is tried against this bundle first (below); if it fails
-                # there it falls back to the Foam rule — other bundles in
-                # alphabetical order of namespace — always with a warning
-                # naming every candidate and the one chosen.
-                qp = qualified_parts(to)
-                if qp is not None:
-                    ns_part, id_part, _explicit = qp
-                    if own_ns and ns_part == own_ns:
-                        findings.append(Finding("error", rel, f"{where} `to: {to}` MUST NOT qualify same-bundle references (SPEC §9.2)"))
-                    elif id_part in federation["index"].get(ns_part, {}):
-                        federation["_stats"]["qualified_resolved"] += 1
-                        # resolved cross-bundle — mirroring is SHOULD not MUST (§6.4), not checked
-                    elif id_part in federation.get("aliases", {}).get(ns_part, {}):
-                        federation["_stats"]["qualified_resolved"] += 1
-                        via = federation["aliases"][ns_part][id_part]
-                        findings.append(Finding("warning", rel, f"{where} `to: {to}` resolves only as an alias of `{ns_part}/{via}` (§6.6) — link to `{ns_part}/{via}`"))
-                    else:
-                        federation["_stats"]["qualified_unresolved"] += 1
-                        findings.append(Finding("warning", rel, f"{where} `to: {to}` qualified reference does not resolve in the federation"))
+                # --federation (SPEC §9.2, §11.1; E15): one order for every reference, in
+                # resolve_ref. Qualified references resolve in the named bundle; an unqualified
+                # one in this bundle first (id, path, alias), then in the other bundles in
+                # federation order (declared `precedence`, then byte order) by id, then by
+                # alias — always with a warning naming every candidate and the one chosen.
+                stats_ = federation["_stats"]
+                if step == "self-qualified":
+                    findings.append(Finding("error", rel, f"{where} `to: {to}` MUST NOT qualify same-bundle references (SPEC §9.2)"))
                     continue
-
-                resolved = to in ids
-                if not resolved:         # a path: concept-relative, or bundle-relative (§6.1)
-                    resolved = (p.parent / to).exists() or (bundle / to).exists()
-                via = None if resolved else alias_to_id.get(to)
-                if via:
+                if step == "qualified":
+                    stats_["qualified_resolved"] += 1
+                    continue         # resolved cross-bundle — mirroring is SHOULD not MUST (§6.4), not checked
+                if step == "qualified-alias":
+                    stats_["qualified_resolved"] += 1
+                    findings.append(Finding("warning", rel, f"{where} `to: {to}` resolves only as an alias of `{r['target']}` (§6.6) — link to `{r['target']}`"))
+                    continue
+                if step == "qualified-broken":
+                    stats_["qualified_unresolved"] += 1
+                    findings.append(Finding("warning", rel, f"{where} `to: {to}` qualified reference does not resolve in the federation"))
+                    continue
+                if step == "own-alias":
                     findings.append(Finding("warning", rel, f"{where} `to: {to}` resolves only as an alias of `{via}` (§6.6) — link to `{via}`"))
                     if not (to in btargets or via in btargets):
                         findings.append(Finding("error", rel, f"{where} `to: {to}` not mirrored by a body markdown link (OKF-compat rule)"))
                     continue
-                if resolved:
+                if step in ("own-id", "own-path"):
                     # genuinely same-bundle — the MUST-mirror rule applies (§6.4)
                     mirrored = to in btargets or Path(to).stem in btargets or path_id(p, to) in btargets
                     if not mirrored:
                         findings.append(Finding("error", rel, f"{where} `to: {to}` not mirrored by a body markdown link (OKF-compat rule)"))
                     continue
-
-                other_ns = sorted(ns for ns in federation["index"] if ns != own_ns)
-                candidates = [ns for ns in other_ns if to in federation["index"][ns]]
-                if candidates:
-                    federation["_stats"]["foam_resolutions"] += 1
-                    chosen = candidates[0]
+                order_note = ("own bundle first, then declared precedence, then byte order"
+                              if federation.get("precedence") else "own bundle first, then alphabetically")
+                if step == "other-id":
+                    stats_["foam_resolutions"] += 1
                     findings.append(Finding("warning", rel,
                         f"{where} `to: {to}` is unqualified; resolves in federation bundle(s) "
-                        f"[{', '.join(candidates)}] — resolved to `{chosen}/{to}` (own bundle first, "
-                        "then alphabetically); the producer should qualify the reference"))
+                        f"[{', '.join(r['candidates'])}] — resolved to `{r['target']}` ({order_note}); "
+                        "the producer should qualify the reference"))
+                    continue
+                if step == "other-alias":
+                    stats_["foam_resolutions"] += 1
+                    findings.append(Finding("warning", rel,
+                        f"{where} `to: {to}` is unqualified and matches only an alias, in federation bundle(s) "
+                        f"[{', '.join(r['candidates'])}] — resolved to `{r['target']}` ({order_note}); "
+                        f"link to `{r['target']}`"))
                     continue
 
                 findings.append(Finding("warning", rel, f"{where} `to: {to}` does not resolve (tolerated: not in any held bundle, by id, path or alias)"))
@@ -1331,7 +1458,26 @@ def run(bundle: Path, level: int, federation: dict | None = None, fed_findings: 
 
 
 def concepts_count(bundle: Path) -> int:
-    return len([p for p in bundle.rglob("*.md") if p.name not in RESERVED_MD])
+    return len([p for p in bundle_rglob(bundle, "*.md") if p.name not in RESERVED_MD])
+
+
+def resolve_main(fed_path: Path, from_ns: str, from_concept: str, to: str) -> int:
+    """--resolve: the E15 interface. Same resolve_ref as link checking, with the containing
+    bundle's ids, paths and aliases taken from the federation index."""
+    if not fed_path.is_file():
+        print(f"error: {fed_path} is not a file", file=sys.stderr)
+        return 2
+    federation, _f, _r = load_federation(fed_path)
+    root = federation["roots"].get(from_ns)
+    if root is None:
+        print(f"error: namespace `{from_ns}` is not held by {fed_path}", file=sys.stderr)
+        return 2
+    ids = federation["index"].get(from_ns, {})
+    paths = {path.resolve(): cid for cid, path in ids.items()}
+    r = resolve_ref(to, from_ns, root / from_concept, root, ids, paths,
+                    federation["aliases"].get(from_ns, {}), federation)
+    print(json.dumps({k: r[k] for k in ("kind", "target", "via", "warning", "error", "candidates")}))
+    return 0
 
 
 def main():
@@ -1347,7 +1493,14 @@ def main():
     ap.add_argument("--federation", type=Path, default=None,
                     help="path to a federation.ai-xf.yaml manifest; resolves namespace/id and "
                          "ai-xf://namespace/id references against its federation-wide index")
+    ap.add_argument("--resolve", nargs=3, metavar=("FROM_NS", "FROM_CONCEPT", "TO"), default=None,
+                    help="resolve one `to` value as written in FROM_CONCEPT (relative to the bundle "
+                         "root) of bundle FROM_NS, and print the result as JSON; the positional "
+                         "argument is then the federation.ai-xf.yaml (E15)")
     args = ap.parse_args()
+
+    if args.resolve is not None:
+        sys.exit(resolve_main(args.bundle, *args.resolve))
 
     bundle = args.bundle
     if not bundle.is_dir():
