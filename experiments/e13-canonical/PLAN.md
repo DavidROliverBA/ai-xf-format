@@ -117,3 +117,28 @@ adversarial set, and every canonical file loads in PyYAML's default loader
 without error (counted as an H6 failure if it does not). If not, the form is
 not vendored into Longview.
 
+## E13d: the number rule (added 2026-10-03, before its run)
+
+E13c failed on numbers only (see `e13-results.md`). Amended rule (CANONICAL.md
+§5):
+
+1. **A number with no fractional part is written as integer digits, whatever
+   its magnitude** (`1e21` → `1000000000000000000000`), as a JSON store returns
+   it and as YAML 1.1 reads it.
+2. **Any other number** is written as ECMAScript's `Number.prototype.toString`
+   writes it, except that an exponent form whose mantissa has no decimal point
+   gains `.0` (`1e-7` → `1.0e-7`), so YAML 1.1 reads a float.
+3. **Stated limit:** a float with no fractional part cannot keep its type across
+   languages (JavaScript has one number type), so it is written as an integer.
+   Integers beyond ±(2^53 − 1) cannot be held exactly by JavaScript or JSON-based
+   systems and SHOULD NOT be used.
+
+**Scope of the strict whole-number-float check (H2):** it measures whether real
+data hits limit 3, so it applies to the five real producers' bundles. The
+adversarial set's deliberate `1.0e+21` is reported as the documented limit, not
+counted against H2.
+
+**Pass:** H1–H6 at 100% on the same 273 concepts as E13c (five producers plus
+the adversarial set); no whole-number float in the real producers' bundles. If
+so, the form is vendored into Longview.
+
