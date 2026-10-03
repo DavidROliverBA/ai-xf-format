@@ -24,6 +24,9 @@ cd experiments/e2-resolution && uv run -q --with pyyaml python3 -m unittest test
 cd experiments/e2-resolution && python3 -m unittest test_resolution.FederationResolution   # one test class
 
 experiments/e2-resolution/run.sh     # full E2 run, including the stdlib-vs-PyYAML diff and the examples/ baseline check
+
+uv run --with pyyaml python3 tools/ai-xf-canon.py check examples/   # canonical form (SPEC §5.7, proposed v0.5)
+experiments/e13-canonical/run.sh     # E13: both canonical implementations, H1-H6 (E13_LONGVIEW=1 adds Longview)
 ```
 
 Each experiment directory has its own `run.sh`. Some need external tools: `uv`, qmd (E3), an MCP client (E4), ORAS + Cosign (E6), MyVault's exporter (E8) and bun for `bunx knowledgex` (E9). Scratch output goes to `/tmp` or gitignored paths.

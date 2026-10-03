@@ -16,6 +16,7 @@ AI-XF-aware agents read the same files and see more.
 | **Curation policy** (non-normative) | [`CURATOR.md`](./CURATOR.md) — seven rules and four numbers to paste into an agent's instructions |
 | **Worked example** | [`examples/`](./examples/) — passes the validator at Level 3 |
 | **Validator** | [`tools/ai-xf-validate.py`](./tools/ai-xf-validate.py) — conformance ladder, `--stats` (curation health and freshness), `--federation`; no dependencies |
+| **Canonical form** (proposed, v0.5) | [`tools/ai-xf-canon.py`](./tools/ai-xf-canon.py) — writes the one canonical serialisation of a concept and its `sha256:` content hash (SPEC §5.7, Appendix D); needs PyYAML |
 
 ---
 
@@ -227,6 +228,10 @@ be a superset of OKF; AI-XF is that superset written down.
   validator reports what a bundle has stopped reconciling (E8, E9).
 - **v0.4.4** (2026-10-03): the validator honours custom rels a bundle declares
   in its own vocabulary, found by a second producer (E12).
+- **v0.5** (proposed, 2026-10-03): a canonical serialisation and content hash,
+  so a database, an importer and a file system write the same bytes for the
+  same concept. Pre-registered and tested first (E13: two independent
+  implementations byte-identical on 268 concepts from five producers).
 
 ## Naming
 

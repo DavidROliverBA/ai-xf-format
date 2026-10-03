@@ -245,6 +245,35 @@ could be stale in one office and fresh in another.
   changed since it was checked (OKF §5.2 makes `generated.at` the last
   meaningful change). E9 found exactly this in this repository's own examples.
 
+### 5.7 Canonical form and content hash (proposed for v0.5)
+
+The same concept can be written in many ways that mean the same thing: keys in
+another order, lists inline or one per line, different quoting, comments. That
+is harmless in a folder, and fatal wherever two systems must agree that they hold
+the same concept: a database that stores concepts as fields, an importer that
+skips unchanged concepts, a writer that checks nothing changed since it read.
+Appendix D defines one **canonical form**, a single exact byte sequence for any
+concept's data, and a **content hash** over it.
+
+- A producer that regenerates concept files, or a system that stores concepts as
+  fields and writes them back out, SHOULD write the canonical form.
+- The **content hash** of a concept is `sha256:` followed by the lower-case hex
+  SHA-256 of its canonical form. Systems that compare concepts, detect changes
+  or guard concurrent writes SHOULD use it. It is never stored inside the file it
+  hashes.
+- The canonical form is a writing rule only. Any valid AI-XF file remains valid
+  input, and consumers MUST NOT reject a concept for not being canonical.
+- Dates and timestamps are strings in the data model (Appendix D.1). Quoting is
+  not data, so a consumer MUST NOT depend on a YAML 1.1 parser's timestamp
+  typing to read them.
+
+Evidence: experiment E13, pre-registered. Two independent implementations
+(Python and TypeScript, two YAML libraries) were byte-identical on 268 concepts
+from five producers; the form was idempotent, preserved every value and every
+validator finding, survived a Postgres `jsonb` round trip byte for byte, and its
+hash ignored 2,144 formatting-only variants while catching 1,069 of 1,069
+single-value edits. The reference implementation is `tools/ai-xf-canon.py`.
+
 ---
 
 ## 6. Relationships
@@ -860,6 +889,8 @@ A conformant consumer:
 - SHOULD synthesise inverse edges (§6.3).
 - MUST preserve unknown keys when round-tripping a document.
 - MUST tolerate v0.1-generation fields per the mapping in §7.3.
+- MUST read dates and timestamps as strings, whether or not they were quoted,
+  and MUST NOT reject a concept for not being in canonical form (§5.7).
 - MUST read a `contradicts` edge without `state` as open, and MUST ignore
   `state` on any other rel (§6.5).
 - SHOULD surface the successor of a deprecated concept (§6.6), guarding against
@@ -899,6 +930,17 @@ their own sanitisation before publishing a bundle — and SHOULD remember that
 Bundles declare the version they target via `manifest.ai-xf.yaml`'s `ai-xf` key.
 Minor versions remain readable by earlier consumers under the permissive rules
 of §11.1.
+
+### Changelog — v0.5 (proposed, 2026-10-03)
+
+**Canonical form and content hash** (§5.7, Appendix D). One exact serialisation
+of a concept's data, so that two systems holding the same concept write the same
+bytes, and a `sha256:` content hash over it. A SHOULD for producers that
+regenerate files and for systems that store concepts as fields; never a reason
+to reject a concept. Consumers read dates and timestamps as strings, quoted or
+not (§11.1). Tested before it was written, in experiment E13 and E13b
+(pre-registered, all hypotheses passed). Reference implementation:
+`tools/ai-xf-canon.py`. Proposed: not yet released.
 
 ### Changelog — v0.4.4 (2026-10-03)
 
@@ -1130,3 +1172,118 @@ tag failed verification while the original stayed verifiable by digest.
 - **Reference from a federation:** `source: oci` with `ref` and `digest` in
   `federation.ai-xf.yaml` (§9.5).
 
+## Appendix D — canonical serialisation (normative, proposed for v0.5)
+
+The exact rules behind §5.7. Tested in experiment E13 (`experiments/e13-canonical/`),
+where two implementations written separately from this text agreed on every byte.
+
+### D.1 The data model
+
+A concept is a **frontmatter mapping** and a **body string**.
+
+The frontmatter is read with the **YAML 1.2 core schema**, with one exception:
+**timestamps are strings**. So `yes`, `on` and `y` are strings; `010` is the
+integer 10; `1:20` is a string; `2026-09-21T08:00:00Z` is a string. Numbers
+compare as JSON numbers (`1.0` equals `1`). Comments, anchors, aliases, tags and
+document markers inside the frontmatter are not data, and a canonical file has
+none.
+
+### D.2 File layout
+
+```
+---\n
+<frontmatter>
+---\n
+\n                      (only when the body is not empty)
+<body>\n                (only when the body is not empty)
+```
+
+- Line endings are `\n`. The file is UTF-8 without a byte-order mark.
+- **Body:** the text after the closing `---` line, with `\r\n` and `\r`
+  turned into `\n`, leading and trailing blank lines removed, then written after
+  one blank line and ended with exactly one `\n`. Nothing inside it changes,
+  including trailing spaces (a markdown line break). An empty body writes
+  nothing after the closing `---\n`.
+- An empty frontmatter mapping writes `---\n---\n`.
+
+### D.3 Key order
+
+Mappings are written in a fixed order: the **listed keys first, in the order
+listed**, then **every other key in ascending order of its UTF-8 bytes**.
+
+| Mapping | Listed keys |
+|---|---|
+| Top level | `type`, `id`, `title`, `description`, `resource`, `tags`, `aliases`, `generated`, `verified`, `status`, `stale_after`, `sources`, `usage_window`, `provenance`, `links`, `media` |
+| `generated`, each `verified[]` entry | `by`, `at` |
+| each `sources[]` entry | `id`, `resource`, `title`, `author`, `last_modified`, `usage_count`, `usage_window`, `withheld` |
+| `usage_window` (anywhere) | `from`, `to` |
+| `provenance` | `confidence`, `source` |
+| each `links[]` entry | `rel`, `to`, `note`, `by`, `at`, `state`, `resolved`, `verified` |
+| `resolved` | `by`, `at`, `outcome` |
+| each `media[]` entry | `uri`, `hash`, `type`, `describes` |
+| any other mapping | none: all keys in byte order |
+
+**Lists keep their order.** Order can carry meaning (`verified` events, a
+writer's ordering of `sources`), so the canonical form never sorts a list.
+
+### D.4 Structure
+
+- Two-space indentation. Block style only, with two exceptions: an empty list
+  is written `[]` and an empty mapping `{}`.
+- A mapping value is written `key: value` when it is a scalar, `[]` or `{}`;
+  otherwise `key:` followed by its content on the next lines, indented two
+  spaces more than the key.
+- A list item is written `- ` at the parent key's indentation plus two
+  (`tags:` then `  - a`). Never at column 0 under its key.
+- A list item that is a mapping starts on the `- ` line with its first key;
+  its other keys line up under the first.
+- A list item that is itself a non-empty list is written `-` alone, with its
+  items on the following lines, indented two spaces more.
+- No line is ever wrapped.
+
+### D.5 Scalars
+
+| Data | Written as |
+|---|---|
+| null | `null` |
+| boolean | `true` / `false` |
+| integer | decimal digits, with `-` when negative |
+| other number | the shortest decimal that reads back as the same number, as ECMAScript's `Number.prototype.toString` writes it (so `0.5`, `1e+21`, `1e-7`); a number with no fractional part below 1e21 is written as an integer (`1.0` → `1`); infinity and not-a-number as `.inf`, `-.inf`, `.nan`; negative zero as `0` |
+| string, **date or timestamp** | plain when it matches `YYYY-MM-DD`, or `YYYY-MM-DDTHH:MM:SS` with an optional fraction and `Z` or `±HH:MM`, under any key (E13b) |
+| string, **plain-safe** | plain, without quotes |
+| any other string | double-quoted |
+
+A string is **plain-safe** when all of these hold:
+
+1. it is not empty, and has no leading or trailing space or tab;
+2. its first character is a letter (`A–Z`, `a–z`), `_` or `/`, or it starts
+   with `./` or `../` followed by a character that is not `.`;
+3. it contains no character below U+0020, no U+007F and no `#`, does not
+   contain `:` followed by a space, and does not end with `:`;
+4. it is not one of (case-insensitive): `null`, `true`, `false`, `yes`, `no`,
+   `y`, `n`, `on`, `off`.
+
+Rule 2 is deliberately stricter than YAML needs: every YAML indicator, digit,
+sign and dot is excluded as a first character, so no number, date, flow
+collection, anchor, tag or block scalar can be read into a plain string.
+Commas, brackets and quotes inside a string are safe, because the canonical form
+never uses flow style. Over-quoting costs nothing; under-quoting changes what a
+YAML 1.1 reader sees.
+
+**Double quoting** writes `"`, then the string with these escapes, then `"`:
+`\` → `\\`, `"` → `\"`, newline → `\n`, tab → `\t`, carriage return → `\r`,
+any other character below U+0020 or U+007F → `\u` and four upper-case hex
+digits. Every other character, including all non-ASCII, is written as itself.
+
+**Readers must take dates and timestamps as strings.** The data model does not
+record whether a value was quoted, so no canonical form can keep a YAML 1.1
+reader's view of every date: E13b measured 409 values on 268 concepts that a
+YAML 1.1 reader types differently before and after, almost all of them
+timestamps a producer had quoted. A reader that resolves YAML 1.1 timestamps
+must turn them back into strings, as OKF's reference Python implementation does
+since its PR #6.
+
+### D.6 Content hash
+
+`sha256:` followed by the lower-case hex SHA-256 of the canonical file's bytes.
+It covers frontmatter and body. It is never stored inside the file it hashes.
