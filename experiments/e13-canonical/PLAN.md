@@ -88,3 +88,32 @@ option must still pass H1–H6 at 100%, measured on the corpus **plus Longview's
 export** (`E13_LONGVIEW=1`, its mock eval-day fixture on a throwaway database).
 If it does not, neither option ships and the question goes back to design.
 
+## E13c: characters the first two runs never saw (added 2026-10-03, before its run)
+
+Vendoring the form into Longview exposed a gap. Longview's own writer quotes C1
+controls, U+2028, U+2029 and U+FEFF; the canonical rules write them plain. A
+check confirmed the consequence: a title containing NEL (U+0085), U+2028,
+U+2029 or a C1 control written in canonical form **cannot be read by PyYAML at
+all** (scanner or reader error). The E13 corpus contained none of them; news
+feeds do.
+
+**Amended rule (CANONICAL.md §5):** a string containing any character outside
+YAML's printable set (`\t`, `\n`, `\r`, U+0020–U+007E, U+00A0–U+D7FF,
+U+E000–U+FFFD, U+10000 and above), or NEL (U+0085), U+2028, U+2029 or U+FEFF, is
+not plain-safe, and double quoting escapes every such character as `\u` and four
+upper-case hex digits. A string with an unpaired surrogate cannot be serialised;
+both implementations refuse it.
+
+**Adversarial corpus:** `fixtures/adversarial/`, synthetic concepts that
+exercise every rule on purpose: each of those characters in values, keys and
+list items; astral characters; reserved words; strings that YAML 1.1 or 1.2
+would read as numbers, booleans, nulls or dates; leading indicators; `: ` and
+` #`; empty, whitespace-only, multi-line and very long strings; nested lists, a
+list of lists, empty lists and maps, nulls, booleans, integers and floats; keys
+that need quoting; a body with CRLF line endings and trailing spaces.
+
+**Pass:** H1–H6 at 100% on the full corpus (with Longview's export) **plus** the
+adversarial set, and every canonical file loads in PyYAML's default loader
+without error (counted as an H6 failure if it does not). If not, the form is
+not vendored into Longview.
+
