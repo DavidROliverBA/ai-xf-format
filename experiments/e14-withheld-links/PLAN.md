@@ -37,3 +37,13 @@ and the target is outside the export.
 | H5 | The validator reads the marker correctly | Unit tests: a well-formed marker gives no finding and is counted in `--stats`; `0`, a negative, a string, an extra key, or `withheld` beside `rel`/`to` are errors; both parsers agree | all pass |
 
 If any criterion fails, the marker does not go into the spec.
+
+**Clarification, 2026-10-03, after measuring "before", before measuring "after".**
+H1's first measure counted a withheld note's title anywhere in a file, which
+counts ordinary prose: titles such as "Framing" or "Event-Driven Architecture"
+are common words the notes use themselves. As the H1 row says, what counts is
+what the exporter generated. A leak is therefore: the target's id as a link
+`to`; its id or title in a `Related` line; or more mentions of its title in an
+exported concept than its source note has outside wiki-links to it. Both
+"before" and "after" are measured this way.
+
