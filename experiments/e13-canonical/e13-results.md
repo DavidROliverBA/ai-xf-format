@@ -147,3 +147,22 @@ so are already canonical at source.
 **Decision:** the form passes on real and hostile data, so it is vendored into
 Longview. SPEC Appendix D carries the E13c and E13d rules.
 
+## Vendoring into Longview (after E13d)
+
+Longview's concept writer now uses `canon.ts` (Longview `c862020`). Two things
+surfaced on the way, both at the boundary with a real producer, neither visible
+in E13's corpus:
+
+- **The escape gap** that E13c found and E13d closed: Longview's own writer
+  already quoted U+2028 and friends, and its test data held them.
+- **`undefined`**: Longview's objects carry an absent key as `undefined`, which
+  `canon.ts` wrote as the string `undefined` (an export with every link dropped
+  failed its gate with "`links` must be a list"). `canon.ts` now refuses it
+  (`26628dc`), and Longview drops such keys before writing.
+
+Verified on a throwaway database with Longview's mock fixture: its export passes
+the validator gate, the Python reference tool reports 76 / 76 canonical, export →
+restore → export is byte-identical, and a pre-canonical bundle restores and
+re-exports canonical. Three Longview writer tests moved to the canonical
+contract; one pins the deliberate YAML 1.1 difference (date-shaped aliases).
+
