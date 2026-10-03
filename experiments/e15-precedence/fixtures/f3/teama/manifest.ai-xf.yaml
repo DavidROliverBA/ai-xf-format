@@ -1,0 +1,7 @@
+ai-xf: "0.5"
+name: teama
+namespace: teama
+description: E15 f3: both teams define `handbook`; teama.
+producer: human:e15-fixture
+generated: 2026-10-04T09:00:00Z
+conformance: 2

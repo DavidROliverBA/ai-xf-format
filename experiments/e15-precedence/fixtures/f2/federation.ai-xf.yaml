@@ -1,0 +1,13 @@
+ai-xf: "0.5"
+federation: e15-f2
+bundles:
+  - namespace: alpha
+    source: path
+    path: ../f1/alpha
+  - namespace: beta
+    source: path
+    path: ../f1/beta
+  - namespace: gamma
+    source: path
+    path: ../f1/gamma
+precedence: [gamma, beta]

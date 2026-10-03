@@ -1,0 +1,12 @@
+ai-xf: "0.5"
+federation: e15-f3
+bundles:
+  - namespace: teama
+    source: path
+    path: ./teama
+  - namespace: team-b
+    source: path
+    path: ./team-b
+  - namespace: zed
+    source: path
+    path: ./zed

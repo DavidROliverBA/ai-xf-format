@@ -1,0 +1,179 @@
+{
+ "cases": [
+  {
+   "case": "c01",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary"
+  },
+  {
+   "case": "c02",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "old-name"
+  },
+  {
+   "case": "c03",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "beta-only"
+  },
+  {
+   "case": "c04",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "nickname"
+  },
+  {
+   "case": "c05",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "former"
+  },
+  {
+   "case": "c06",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "nowhere"
+  },
+  {
+   "case": "c07",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "beta/glossary"
+  },
+  {
+   "case": "c08",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "alpha/glossary"
+  },
+  {
+   "case": "c09",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "concepts/home.md"
+  },
+  {
+   "case": "c10",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "concepts/home"
+  },
+  {
+   "case": "c11",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "old-name"
+  },
+  {
+   "case": "c12",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "beta",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary"
+  },
+  {
+   "case": "c13",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "beta",
+   "from_concept": "concepts/glossary.md",
+   "to": "gamma-only"
+  },
+  {
+   "case": "c14",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "shared-x"
+  },
+  {
+   "case": "c15",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "beta/nickname"
+  },
+  {
+   "case": "c16",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "shared-x"
+  },
+  {
+   "case": "c17",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary"
+  },
+  {
+   "case": "c18",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "common"
+  },
+  {
+   "case": "c19",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "common"
+  },
+  {
+   "case": "c20",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "nickname"
+  },
+  {
+   "case": "c21",
+   "federation": "fixtures/f3/federation.ai-xf.yaml",
+   "from_namespace": "zed",
+   "from_concept": "concepts/glossary.md",
+   "to": "handbook"
+  },
+  {
+   "case": "c22",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "outer",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary"
+  },
+  {
+   "case": "c23",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "outer",
+   "from_concept": "concepts/glossary.md",
+   "to": "runbook"
+  },
+  {
+   "case": "c24",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "team",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary"
+  },
+  {
+   "case": "c25",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "team",
+   "from_concept": "concepts/glossary.md",
+   "to": "policy"
+  }
+ ]
+}

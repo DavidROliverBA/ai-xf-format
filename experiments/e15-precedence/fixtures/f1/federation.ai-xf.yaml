@@ -1,0 +1,12 @@
+ai-xf: "0.5"
+federation: e15-f1
+bundles:
+  - namespace: alpha
+    source: path
+    path: ./alpha
+  - namespace: beta
+    source: path
+    path: ./beta
+  - namespace: gamma
+    source: path
+    path: ./gamma

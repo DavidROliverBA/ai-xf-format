@@ -1,0 +1,7 @@
+ai-xf: "0.5"
+name: beta
+namespace: beta
+description: E15 f1: collides with alpha on ids and aliases.
+producer: human:e15-fixture
+generated: 2026-10-04T09:00:00Z
+conformance: 2

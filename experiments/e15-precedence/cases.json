@@ -1,0 +1,488 @@
+{
+ "note": "Expected outcomes written by hand from PROPOSED-RULE.md before any resolver ran. `intent`: what the fixture's author meant the reference to reach (null where no single intent exists); used only for PLAN.md's step-4 decision.",
+ "cases": [
+  {
+   "case": "c01",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary",
+   "gap": null,
+   "intent": "alpha/glossary",
+   "why": "control: own bundle wins, silently",
+   "expected": {
+    "kind": "id",
+    "target": "alpha/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c02",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "old-name",
+   "gap": 1,
+   "intent": "alpha/renamed",
+   "why": "own alias before another bundle's live id",
+   "expected": {
+    "kind": "id",
+    "target": "alpha/renamed",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c03",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "beta-only",
+   "gap": null,
+   "intent": "beta/beta-only",
+   "why": "control: one other bundle",
+   "expected": {
+    "kind": "id",
+    "target": "beta/beta-only",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c04",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "nickname",
+   "gap": 2,
+   "intent": null,
+   "why": "alias in two other bundles; intent ambiguous, the warning must name both",
+   "expected": {
+    "kind": "id",
+    "target": "beta/beta-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta",
+     "gamma"
+    ]
+   }
+  },
+  {
+   "case": "c05",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "former",
+   "gap": 2,
+   "intent": "alpha/legacy-thing",
+   "why": "a concept renamed in another bundle",
+   "expected": {
+    "kind": "id",
+    "target": "alpha/legacy-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "alpha"
+    ]
+   }
+  },
+  {
+   "case": "c06",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "nowhere",
+   "gap": null,
+   "intent": null,
+   "why": "control: broken link, tolerated",
+   "expected": {
+    "kind": "id",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c07",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "beta/glossary",
+   "gap": null,
+   "intent": "beta/glossary",
+   "why": "control: qualified",
+   "expected": {
+    "kind": "qualified",
+    "target": "beta/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c08",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "alpha/glossary",
+   "gap": null,
+   "intent": "alpha/glossary",
+   "why": "control: self-qualified is an error",
+   "expected": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": false,
+    "error": true,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c09",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "concepts/home.md",
+   "gap": null,
+   "intent": "alpha/home",
+   "why": "control: bundle-relative path",
+   "expected": {
+    "kind": "path",
+    "target": "alpha/home",
+    "via": "path",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c10",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "concepts/home",
+   "gap": 5,
+   "intent": "alpha/home",
+   "why": "extensionless path reads as qualified; broken, not misresolved",
+   "expected": {
+    "kind": "qualified",
+    "target": null,
+    "via": null,
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c11",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "old-name",
+   "gap": 1,
+   "intent": "beta/old-name",
+   "why": "another bundle's live id before an earlier bundle's alias",
+   "expected": {
+    "kind": "id",
+    "target": "beta/old-name",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c12",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "beta",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary",
+   "gap": null,
+   "intent": "beta/glossary",
+   "why": "control: own bundle",
+   "expected": {
+    "kind": "id",
+    "target": "beta/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c13",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "beta",
+   "from_concept": "concepts/glossary.md",
+   "to": "gamma-only",
+   "gap": null,
+   "intent": "gamma/gamma-only",
+   "why": "control",
+   "expected": {
+    "kind": "id",
+    "target": "gamma/gamma-only",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "gamma"
+    ]
+   }
+  },
+  {
+   "case": "c14",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "shared-x",
+   "gap": null,
+   "intent": "beta/shared-x",
+   "why": "byte order between two other bundles",
+   "expected": {
+    "kind": "id",
+    "target": "beta/shared-x",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta",
+     "gamma"
+    ]
+   }
+  },
+  {
+   "case": "c15",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "beta/nickname",
+   "gap": null,
+   "intent": "beta/beta-thing",
+   "why": "control: qualified alias",
+   "expected": {
+    "kind": "qualified",
+    "target": "beta/beta-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c16",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "shared-x",
+   "gap": null,
+   "intent": null,
+   "why": "declared precedence overrides byte order",
+   "expected": {
+    "kind": "id",
+    "target": "gamma/shared-x",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "gamma",
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c17",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary",
+   "gap": null,
+   "intent": "alpha/glossary",
+   "why": "precedence never beats the own bundle",
+   "expected": {
+    "kind": "id",
+    "target": "alpha/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c18",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "common",
+   "gap": null,
+   "intent": null,
+   "why": "listed namespace before unlisted",
+   "expected": {
+    "kind": "id",
+    "target": "beta/common",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "beta",
+     "alpha"
+    ]
+   }
+  },
+  {
+   "case": "c19",
+   "federation": "fixtures/f1/federation.ai-xf.yaml",
+   "from_namespace": "gamma",
+   "from_concept": "concepts/glossary.md",
+   "to": "common",
+   "gap": null,
+   "intent": null,
+   "why": "same reference without precedence",
+   "expected": {
+    "kind": "id",
+    "target": "alpha/common",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "alpha",
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c20",
+   "federation": "fixtures/f2/federation.ai-xf.yaml",
+   "from_namespace": "alpha",
+   "from_concept": "concepts/glossary.md",
+   "to": "nickname",
+   "gap": null,
+   "intent": null,
+   "why": "precedence applies to aliases too",
+   "expected": {
+    "kind": "id",
+    "target": "gamma/gamma-thing",
+    "via": "alias",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "gamma",
+     "beta"
+    ]
+   }
+  },
+  {
+   "case": "c21",
+   "federation": "fixtures/f3/federation.ai-xf.yaml",
+   "from_namespace": "zed",
+   "from_concept": "concepts/glossary.md",
+   "to": "handbook",
+   "gap": 3,
+   "intent": null,
+   "why": "byte order; Postgres's default collation sorts teama first",
+   "expected": {
+    "kind": "id",
+    "target": "team-b/handbook",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "team-b",
+     "teama"
+    ]
+   }
+  },
+  {
+   "case": "c22",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "outer",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary",
+   "gap": 4,
+   "intent": "outer/glossary",
+   "why": "the nested team's glossary is not part of outer",
+   "expected": {
+    "kind": "id",
+    "target": "outer/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c23",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "outer",
+   "from_concept": "concepts/glossary.md",
+   "to": "runbook",
+   "gap": 4,
+   "intent": "team/runbook",
+   "why": "a nested bundle is a separate bundle: never silent",
+   "expected": {
+    "kind": "id",
+    "target": "team/runbook",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "team"
+    ]
+   }
+  },
+  {
+   "case": "c24",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "team",
+   "from_concept": "concepts/glossary.md",
+   "to": "glossary",
+   "gap": 4,
+   "intent": "team/glossary",
+   "why": "the scoped definition wins inside its own bundle",
+   "expected": {
+    "kind": "id",
+    "target": "team/glossary",
+    "via": "id",
+    "warning": false,
+    "error": false,
+    "candidates": []
+   }
+  },
+  {
+   "case": "c25",
+   "federation": "fixtures/f4/federation.ai-xf.yaml",
+   "from_namespace": "team",
+   "from_concept": "concepts/glossary.md",
+   "to": "policy",
+   "gap": 4,
+   "intent": "outer/policy",
+   "why": "the enclosing bundle is another bundle",
+   "expected": {
+    "kind": "id",
+    "target": "outer/policy",
+    "via": "id",
+    "warning": true,
+    "error": false,
+    "candidates": [
+     "outer"
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+ai-xf: "0.5"
+federation: e15-f4
+bundles:
+  - namespace: outer
+    source: path
+    path: ./outer
+  - namespace: team
+    source: path
+    path: ./outer/team
