@@ -4,8 +4,9 @@ id: orders-table
 title: Orders Table
 description: One row per completed customer order.
 resource: https://internal.example.com/data/orders
-tags: [data, orders]
-
+tags:
+  - data
+  - orders
 generated:
   by: human:jane-doe
   at: 2026-05-28T14:30:00Z
@@ -16,11 +17,9 @@ verified:
     at: 2026-05-28T15:30:00Z
 status: stable
 stale_after: 2027-05-28T00:00:00Z
-
 provenance:
   confidence: high
   source: primary
-
 links:
   - rel: referenced-by
     to: payment-service

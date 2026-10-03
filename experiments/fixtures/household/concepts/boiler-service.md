@@ -3,8 +3,10 @@ type: Runbook
 id: boiler-service
 title: Annual Boiler Service Runbook
 description: Steps for booking and completing the annual boiler service and safety check.
-tags: [household, maintenance, runbook]
-
+tags:
+  - household
+  - maintenance
+  - runbook
 generated:
   by: human:household-admin
   at: 2026-02-01T09:00:00Z
@@ -13,7 +15,6 @@ verified:
     at: 2026-02-01T10:00:00Z
 status: stable
 stale_after: 2027-02-01T00:00:00Z
-
 provenance:
   confidence: high
   source: primary

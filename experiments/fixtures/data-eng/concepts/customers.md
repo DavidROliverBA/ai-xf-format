@@ -4,18 +4,17 @@ id: customers
 title: Customers Table
 description: One row per known customer, keyed by customer_id; source table for the orders table's customer_id foreign key.
 resource: https://internal.example.com/data-eng/data/customers
-tags: [data, customers]
-
+tags:
+  - data
+  - customers
 generated:
   by: human:sam-patel
   at: 2026-03-15T09:00:00Z
 status: draft
 stale_after: 2026-12-15T00:00:00Z
-
 provenance:
   confidence: medium
   source: primary
-
 links:
   - rel: referenced-by
     to: orders-table

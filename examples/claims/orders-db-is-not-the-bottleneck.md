@@ -3,8 +3,9 @@ type: Claim
 id: orders-db-is-not-the-bottleneck
 title: The orders database is not the payment bottleneck
 description: A load test shows the orders database has headroom at peak; the limit is elsewhere.
-tags: [payments, performance]
-
+tags:
+  - payments
+  - performance
 generated:
   by: curator/1.0
   at: 2026-09-21T08:00:00Z
@@ -14,17 +15,15 @@ sources:
   - id: sept-load-test
     resource: https://internal.example.com/tests/2026-09-18-capture-load
     title: Capture load test, 18 September 2026
-
 provenance:
   source: secondary
-
 links:
   - rel: contradicts
     to: sync-capture-limits-throughput
-    state: open
+    note: New load test disagrees with the Q2 attribution. Both claims kept; awaiting a human ruling.
     by: curator/1.0
     at: 2026-09-21T00:00:00Z
-    note: New load test disagrees with the Q2 attribution. Both claims kept; awaiting a human ruling.
+    state: open
 ---
 
 # Claim

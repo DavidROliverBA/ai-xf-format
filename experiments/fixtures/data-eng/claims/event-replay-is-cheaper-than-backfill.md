@@ -3,8 +3,10 @@ type: Claim
 id: event-replay-is-cheaper-than-backfill
 title: Event replay is cheaper than a batch backfill for recovering orders state
 description: Replaying the orders-events stream from offset costs less compute than re-running the nightly batch backfill job for the same recovery window.
-tags: [data, streaming, cost]
-
+tags:
+  - data
+  - streaming
+  - cost
 generated:
   by: human:sam-patel
   at: 2026-08-12T09:00:00Z
@@ -14,21 +16,19 @@ sources:
   - id: replay-cost-analysis
     resource: https://internal.example.com/data-eng/analysis/replay-vs-backfill-cost
     title: Replay vs backfill cost analysis, August 2026
-
 provenance:
   confidence: medium
   source: primary
-
 links:
   - rel: supports
     to: orders-events
     note: This is the case for keeping the stream's retention window long enough to replay from, rather than relying on batch recovery.
   - rel: contradicts
     to: retention-policy
-    state: open
+    note: The policy's disaster-recovery approach assumes batch backfill is the cheaper recovery path; this analysis disagrees for the orders table specifically. Both kept; awaiting a ruling.
     by: human:sam-patel
     at: 2026-08-12T00:00:00Z
-    note: The policy's disaster-recovery approach assumes batch backfill is the cheaper recovery path; this analysis disagrees for the orders table specifically. Both kept; awaiting a ruling.
+    state: open
 ---
 
 # Claim

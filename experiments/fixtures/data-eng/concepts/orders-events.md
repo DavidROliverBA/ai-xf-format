@@ -4,8 +4,10 @@ id: orders-events
 title: Orders Event Stream
 description: Kafka topic publishing order lifecycle events (created, updated, cancelled) for downstream consumers.
 resource: https://internal.example.com/data-eng/streams/orders-events
-tags: [data, streaming, orders]
-
+tags:
+  - data
+  - streaming
+  - orders
 generated:
   by: human:sam-patel
   at: 2026-06-01T10:00:00Z
@@ -18,11 +20,9 @@ sources:
   - id: orders-events-design
     resource: https://internal.example.com/data-eng/designs/orders-events
     title: Orders event stream design
-
 provenance:
   confidence: high
   source: primary
-
 links:
   - rel: derived-from
     to: orders-table

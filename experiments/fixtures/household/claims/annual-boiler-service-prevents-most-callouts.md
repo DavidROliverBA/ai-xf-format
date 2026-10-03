@@ -3,8 +3,9 @@ type: Claim
 id: annual-boiler-service-prevents-most-callouts
 title: An annual boiler service prevents most emergency callouts
 description: Boilers serviced annually rarely need an emergency callout compared to unserviced boilers, based on the household's own repair record.
-tags: [household, maintenance]
-
+tags:
+  - household
+  - maintenance
 generated:
   by: human:household-admin
   at: 2026-02-05T09:00:00Z
@@ -17,10 +18,8 @@ sources:
   - id: repair-log
     resource: https://example.com/household/repair-log-2023-2026
     title: Household boiler repair log, 2023–2026
-
 provenance:
   source: primary
-
 links:
   - rel: supports
     to: boiler-service

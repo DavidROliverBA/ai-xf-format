@@ -4,10 +4,12 @@ id: payment-service
 title: Payment Service
 description: Handles authorisation and capture for all customer payments.
 resource: https://internal.example.com/services/payment
-tags: [platform, payments]
-aliases: [Payments API, PaymentSvc]
-
-# OKF v0.2 trust & lifecycle
+tags:
+  - platform
+  - payments
+aliases:
+  - Payments API
+  - PaymentSvc
 generated:
   by: human:jane-doe
   at: 2026-07-18T09:12:00Z
@@ -20,12 +22,9 @@ sources:
   - id: payments-runbook
     resource: https://internal.example.com/runbooks/payments
     title: Payments runbook
-
-# AI-XF additions
 provenance:
   confidence: high
   source: primary
-
 links:
   - rel: depends-on
     to: orders-table
@@ -35,12 +34,11 @@ links:
     note: v2 replaces the synchronous capture flow with events.
   - rel: authored-by
     to: jane-doe
-
 media:
   - uri: https://internal.example.com/diagrams/payment-flow.png
     hash: sha256:9f2c8a41d6e07b3355c1a2f4e8b9d0c7a6f5e4d3c2b1a09876543210fedcba98
-    title: Payment capture flow (v1, synchronous)
     describes: payment-service
+    title: Payment capture flow (v1, synchronous)
 ---
 
 # Overview

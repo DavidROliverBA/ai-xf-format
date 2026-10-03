@@ -3,8 +3,9 @@ type: Claim
 id: sync-capture-limits-throughput
 title: Synchronous capture limits payment throughput
 description: Payment throughput is capped by synchronous reads against the orders database.
-tags: [payments, performance]
-
+tags:
+  - payments
+  - performance
 generated:
   by: human:jane-doe
   at: 2026-07-18T09:30:00Z
@@ -20,16 +21,14 @@ sources:
   - id: q2-capacity-review
     resource: https://internal.example.com/reviews/2026-q2-capacity
     title: Q2 capacity review
-
 provenance:
   source: secondary
-
 links:
   - rel: supports
     to: payment-service-v2
+    note: This claim is the case for the event-driven rewrite.
     by: human:jane-doe
     at: 2026-07-18T00:00:00Z
-    note: This claim is the case for the event-driven rewrite.
   - rel: describes
     to: payment-service
 ---

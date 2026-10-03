@@ -3,8 +3,9 @@ type: Claim
 id: insurance-renewal-quotes-beat-auto-renew
 title: Getting renewal quotes beats accepting auto-renewal
 description: Comparing at least two alternative quotes before the renewal date has beaten the auto-renew price every year on the household's own record.
-tags: [household, finance]
-
+tags:
+  - household
+  - finance
 generated:
   by: human:household-admin
   at: 2026-03-05T09:00:00Z
@@ -14,11 +15,9 @@ sources:
   - id: renewal-price-log
     resource: https://example.com/household/renewal-price-log
     title: Household insurance renewal price log
-
 provenance:
   confidence: low
   source: primary
-
 links:
   - rel: supports
     to: insurance-renewal

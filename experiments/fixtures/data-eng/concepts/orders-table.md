@@ -4,8 +4,10 @@ id: orders-table
 title: Orders Table (schema of record)
 description: Canonical orders table owned by the data engineering team; one row per order, source of truth for the schema.
 resource: https://internal.example.com/data-eng/data/orders
-tags: [data, orders, schema]
-
+tags:
+  - data
+  - orders
+  - schema
 generated:
   by: human:sam-patel
   at: 2026-04-10T09:00:00Z
@@ -14,11 +16,9 @@ verified:
     at: 2026-09-01T00:00:00Z
 status: stable
 stale_after: 2027-04-10T00:00:00Z
-
 provenance:
   confidence: high
   source: primary
-
 links:
   - rel: source-of
     to: orders-events

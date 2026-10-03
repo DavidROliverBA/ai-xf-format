@@ -3,8 +3,10 @@ type: Policy
 id: retention-policy
 title: Orders and Customer Data Retention Policy
 description: Retention and deletion policy for order and customer data holdings, including the batch backfill job used for disaster recovery.
-tags: [data, governance, policy]
-
+tags:
+  - data
+  - governance
+  - policy
 generated:
   by: human:sam-patel
   at: 2026-02-01T09:00:00Z
@@ -17,10 +19,8 @@ sources:
   - id: data-retention-standard
     resource: https://internal.example.com/data-eng/policies/retention-standard
     title: Data retention standard v3
-
 provenance:
   source: secondary
-
 links:
   - rel: relates-to
     to: orders-table

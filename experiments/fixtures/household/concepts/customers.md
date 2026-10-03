@@ -3,14 +3,15 @@ type: Concept
 id: customers
 title: Customers (Household Bakes)
 description: Notes on the regular customers of a small home-baking side business run from the house.
-tags: [household, baking, customers]
-
+tags:
+  - household
+  - baking
+  - customers
 generated:
   by: human:household-admin
   at: 2026-01-10T18:00:00Z
 status: stable
 stale_after: 2026-07-10T00:00:00Z
-
 provenance:
   confidence: medium
   source: primary
