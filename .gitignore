@@ -12,3 +12,6 @@ experiments/e3-index/all-bundles/
 experiments/e3-index/bm25_index.json
 experiments/**/*.gguf
 experiments/**/*.sqlite*
+
+# experiment dependencies (E13)
+node_modules/
