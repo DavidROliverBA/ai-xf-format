@@ -103,3 +103,26 @@ reference implementation does since its PR #6. `CANONICAL.md` §5 now says so.
 **Longview** passes every hypothesis and, like every other producer, writes no
 canonical files today (0 / 76).
 
+## E13c: hostile characters and values — failed, on numbers
+
+**2026-10-03.** Pre-registered (`f4b3639`). The escape rule for NEL, U+2028,
+U+2029, C1 controls, DEL and U+FEFF was added to both implementations and the
+reference tool, and `fixtures/adversarial/` (five synthetic concepts written by
+hand) joined the corpus with Longview's export: 273 concepts.
+Numbers in `results-e13c.json`.
+
+| Hypothesis | Result |
+|---|---|
+| H1 idempotent, H3 implementations agree, H5 hash | 100% (273 / 273; 2,179 variants; 1,088 mutations) |
+| H2 meaning preserved | data model 273 / 273, validator findings identical; **fails** the strict check: the adversarial set holds one whole-number float (`1.0e+21`) |
+| H4 Postgres round trip | **272 / 273**: `huge: 1.0e+21` returns from `jsonb` as the integer 1000000000000000000000 and is written as digits, not `1e+21` |
+| H6 YAML 1.1 reading | **272 / 273**: the canonical `1e+21` and `1e-7` have no decimal point, so YAML 1.1 reads both as strings |
+
+**The character fix works:** every separator, control and BOM case, in values,
+keys and lists, now loads in PyYAML and round-trips in both implementations.
+**The number rule does not:** ECMAScript's exponent form (`1e+21`, `1e-7`) is
+not a float to a YAML 1.1 reader, and a whole number at or above 10^21 comes back
+from a JSON store as an integer. No real producer writes such numbers, which is
+why E13 and E13b passed; the adversarial set was built to find exactly this. By
+the plan, the form was **not** vendored into Longview.
+

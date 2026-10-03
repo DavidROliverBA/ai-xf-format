@@ -31,6 +31,8 @@ done
 # A KnowledgeX notebook (a third-party producer): saved from E9's run rather than regenerated, so
 # no package is downloaded and run here.
 copy "$HERE/fixtures/knowledgex" knowledgex
+# E13c: synthetic concepts that exercise every scalar and structure rule on purpose.
+copy "$HERE/fixtures/adversarial" adversarial
 
 DOCKER=0; command -v docker >/dev/null && docker info >/dev/null 2>&1 && DOCKER=1
 

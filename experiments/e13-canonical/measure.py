@@ -254,7 +254,11 @@ def main() -> None:
             tally("H5a", canon.content_hash(text) == h_orig, name)
         for name, text in mutations(fm, body).items():
             tally("H5b", "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest() != h_orig, name)
-        y11 = yaml.safe_load(canon.split(py)[0]) or {}
+        try:
+            y11 = yaml.safe_load(canon.split(py)[0]) or {}
+        except yaml.YAMLError as e:          # E13c: an unreadable canonical file fails H6
+            tally("H6", False, f"PyYAML cannot read the canonical file: {type(e).__name__}")
+            continue
         try:
             n_changed = changed_leaves(yaml.safe_load(canon.split(orig)[0]) or {}, y11)
         except yaml.YAMLError:

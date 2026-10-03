@@ -1258,8 +1258,9 @@ A string is **plain-safe** when all of these hold:
 1. it is not empty, and has no leading or trailing space or tab;
 2. its first character is a letter (`A–Z`, `a–z`), `_` or `/`, or it starts
    with `./` or `../` followed by a character that is not `.`;
-3. it contains no character below U+0020, no U+007F and no `#`, does not
-   contain `:` followed by a space, and does not end with `:`;
+3. it contains no character below U+0020, no character that double quoting
+   escapes (below), and no `#`; does not contain `:` followed by a space; and
+   does not end with `:`;
 4. it is not one of (case-insensitive): `null`, `true`, `false`, `yes`, `no`,
    `y`, `n`, `on`, `off`.
 
@@ -1271,9 +1272,13 @@ never uses flow style. Over-quoting costs nothing; under-quoting changes what a
 YAML 1.1 reader sees.
 
 **Double quoting** writes `"`, then the string with these escapes, then `"`:
-`\` → `\\`, `"` → `\"`, newline → `\n`, tab → `\t`, carriage return → `\r`,
-any other character below U+0020 or U+007F → `\u` and four upper-case hex
-digits. Every other character, including all non-ASCII, is written as itself.
+`\` → `\\`, `"` → `\"`, newline → `\n`, tab → `\t`, carriage return → `\r`;
+and `\u` with four upper-case hex digits for every other character outside
+YAML's printable set (U+0020–U+007E, U+00A0–U+D7FF, U+E000–U+FFFD, U+10000
+and above), and for NEL (U+0085), U+2028, U+2029 and U+FEFF, which YAML 1.1
+reads as line breaks or a byte-order mark (E13c). Every other character,
+including all other non-ASCII, is written as itself. A string containing an
+unpaired surrogate cannot be serialised.
 
 **Readers must take dates and timestamps as strings.** The data model does not
 record whether a value was quoted, so no canonical form can keep a YAML 1.1

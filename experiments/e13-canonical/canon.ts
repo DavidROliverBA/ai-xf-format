@@ -63,12 +63,28 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const DATES = process.env.AIXF_CANON_DATES ?? "shape"; // "shape" adopted in E13b
 const RESERVED = new Set(["null", "true", "false", "yes", "no", "y", "n", "on", "off"]);
 
+/** Outside YAML's printable set, or a YAML 1.1 line break or BOM (E13c). */
+function needsEscape(c: number): boolean {
+  const printable = c === 0x09 || c === 0x0a || c === 0x0d || (c >= 0x20 && c <= 0x7e) ||
+    (c >= 0xa0 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xfffd) || c >= 0x10000;
+  return !printable || c === 0x85 || c === 0x2028 || c === 0x2029 || c === 0xfeff;
+}
+
+function checkSurrogates(s: string): void {
+  for (const c of s) {
+    const code = c.codePointAt(0) as number;
+    if (code >= 0xd800 && code <= 0xdfff) throw new Error("a string with an unpaired surrogate cannot be serialised");
+  }
+}
+
+const hasEscapable = (s: string) => [...s].some((c) => needsEscape(c.codePointAt(0) as number));
+
 function plainSafe(s: string): boolean {
   if (s.length === 0 || /^[ \t]|[ \t]$/.test(s)) return false;
   const pathStart = (s.startsWith("./") && s.length > 2 && s[2] !== ".") ||
     (s.startsWith("../") && s.length > 3 && s[3] !== ".");
   if (!/^[A-Za-z_/]/.test(s) && !pathStart) return false;
-  if (/[\u0000-\u001f\u007f#]/.test(s) || s.includes(": ") || s.endsWith(":")) return false;
+  if (/[\u0000-\u001f#]/.test(s) || hasEscapable(s) || s.includes(": ") || s.endsWith(":")) return false;
   return !RESERVED.has(s.toLowerCase());
 }
 
@@ -81,7 +97,7 @@ function doubleQuote(s: string): string {
     else if (c === "\n") out += "\\n";
     else if (c === "\t") out += "\\t";
     else if (c === "\r") out += "\\r";
-    else if (code < 0x20 || code === 0x7f) out += `\\u${code.toString(16).toUpperCase().padStart(4, "0")}`;
+    else if (needsEscape(code)) out += `\\u${code.toString(16).toUpperCase().padStart(4, "0")}`;
     else out += c;
   }
   return `${out}"`;
@@ -97,6 +113,7 @@ function scalar(v: Value, key?: string): string {
     return String(v); // ECMAScript Number.prototype.toString; integral values below 1e21 print as integers
   }
   const s = String(v);
+  checkSurrogates(s);
   if (DATES === "shape" && (TS_RE.test(s) || DATE_RE.test(s))) return s;
   if (DATES === "keys" && key !== undefined && TS_KEYS.has(key) && TS_RE.test(s)) return s;
   return plainSafe(s) ? s : doubleQuote(s);
@@ -108,7 +125,10 @@ const isLeaf = (v: Value) =>
   v === null || typeof v !== "object" || (Array.isArray(v) ? v.length === 0 : Object.keys(v).length === 0);
 const leaf = (v: Value, key?: string) =>
   Array.isArray(v) ? "[]" : v !== null && typeof v === "object" ? "{}" : scalar(v, key);
-const keyText = (k: string) => (plainSafe(k) ? k : doubleQuote(k));
+const keyText = (k: string) => {
+  checkSurrogates(k);
+  return plainSafe(k) ? k : doubleQuote(k);
+};
 
 function emitMap(m: Mapping, indent: number, role: string | null, out: string[]): void {
   const pad = " ".repeat(indent);

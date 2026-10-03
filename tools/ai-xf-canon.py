@@ -121,6 +121,18 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 RESERVED = {"null", "true", "false", "yes", "no", "y", "n", "on", "off"}
 
 
+def needs_escape(c: int) -> bool:
+    """Outside YAML's printable set, or a YAML 1.1 line break or BOM (E13c)."""
+    printable = c in (0x09, 0x0A, 0x0D) or 0x20 <= c <= 0x7E or 0xA0 <= c <= 0xD7FF \
+        or 0xE000 <= c <= 0xFFFD or c >= 0x10000
+    return not printable or c in (0x85, 0x2028, 0x2029, 0xFEFF)
+
+
+def check_surrogates(s: str) -> None:
+    if any(0xD800 <= ord(c) <= 0xDFFF for c in s):
+        raise ValueError("a string with an unpaired surrogate cannot be serialised")
+
+
 def plain_safe(s: str) -> bool:
     if not s or s[0] in " \t" or s[-1] in " \t":
         return False
@@ -129,7 +141,7 @@ def plain_safe(s: str) -> bool:
             or (s.startswith("./") and len(s) > 2 and s[2] != ".")
             or (s.startswith("../") and len(s) > 3 and s[3] != ".")):
         return False
-    if any(ord(c) < 0x20 or ord(c) == 0x7F for c in s) or "#" in s or ": " in s or s.endswith(":"):
+    if any(ord(c) < 0x20 or needs_escape(ord(c)) for c in s) or "#" in s or ": " in s or s.endswith(":"):
         return False
     return s.lower() not in RESERVED
 
@@ -147,7 +159,7 @@ def double_quote(s: str) -> str:
             out.append("\\t")
         elif c == "\r":
             out.append("\\r")
-        elif ord(c) < 0x20 or ord(c) == 0x7F:
+        elif needs_escape(ord(c)):
             out.append("\\u%04X" % ord(c))
         else:
             out.append(c)
@@ -189,12 +201,15 @@ def scalar(v, key=None) -> str:
             return str(int(v))
         return js_number(v)
     s = str(v)
+    check_surrogates(s)
     if TS_RE.match(s) or DATE_RE.match(s):      # Appendix D.5: any date or datetime shape stays plain
         return s
     return s if plain_safe(s) else double_quote(s)
 
 
 def key_text(k) -> str:
+    if isinstance(k, str):
+        check_surrogates(k)
     return scalar(k) if not isinstance(k, str) else (k if plain_safe(k) else double_quote(k))
 
 
