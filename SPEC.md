@@ -1,9 +1,9 @@
 # AI-XF — AI eXchange Format
 
-**Version:** 0.4
+**Version:** 0.5
 **Status:** Draft
-**Date:** 2026-09-26
-**Supersedes:** v0.3 (2026-09-21)
+**Date:** 2026-10-03
+**Supersedes:** v0.4 (2026-09-26)
 
 AI-XF is an open, vendor-neutral format for representing curated knowledge so that
 humans and AI agents can produce and consume it without a translation layer. It
@@ -245,7 +245,7 @@ could be stale in one office and fresh in another.
   changed since it was checked (OKF §5.2 makes `generated.at` the last
   meaningful change). E9 found exactly this in this repository's own examples.
 
-### 5.7 Canonical form and content hash (proposed for v0.5)
+### 5.7 Canonical form and content hash
 
 The same concept can be written in many ways that mean the same thing: keys in
 another order, lists inline or one per line, different quoting, comments. That
@@ -296,7 +296,7 @@ map:
 
 A link asserts a **directed** edge from the containing concept to `to`.
 
-**Withheld links (proposed for v0.5).** A `links` entry MAY instead be a
+**Withheld links.** A `links` entry MAY instead be a
 **withheld marker**: the single key `withheld` with a positive integer, the
 number of links removed from this concept for a reader who may not see their
 targets. It names nothing, has no `rel` or `to`, and needs no body mirror
@@ -942,7 +942,7 @@ Bundles declare the version they target via `manifest.ai-xf.yaml`'s `ai-xf` key.
 Minor versions remain readable by earlier consumers under the permissive rules
 of §11.1.
 
-### Changelog — v0.5 (proposed, 2026-10-03)
+### Changelog — v0.5 (2026-10-03)
 
 **Canonical form and content hash** (§5.7, Appendix D). One exact serialisation
 of a concept's data, so that two systems holding the same concept write the same
@@ -958,7 +958,7 @@ hypothesis passed on 273 concepts, including a hand-written adversarial set). Re
 links removed for a reader who may not see their targets, naming nothing; the
 §7.5 source marker applied to links. The reference validator checks its shape
 and reports `withheld_links` in `--stats`. Tested first in experiment E14
-(pre-registered, all hypotheses passed). Proposed: not yet released.
+(pre-registered, all hypotheses passed).
 
 ### Changelog — v0.4.4 (2026-10-03)
 
@@ -1190,7 +1190,7 @@ tag failed verification while the original stayed verifiable by digest.
 - **Reference from a federation:** `source: oci` with `ref` and `digest` in
   `federation.ai-xf.yaml` (§9.5).
 
-## Appendix D — canonical serialisation (normative, proposed for v0.5)
+## Appendix D — canonical serialisation (normative)
 
 The exact rules behind §5.7. Tested in experiment E13 (`experiments/e13-canonical/`),
 where two implementations written separately from this text agreed on every byte.

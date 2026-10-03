@@ -237,7 +237,7 @@ The two misses (q09, q11) need a second hop that one search-then-get cannot make
 
 ## E14: withheld-link marker (pre-registered)
 
-**2026-10-03.** Plan `fdcd6f1`. The vault exporter withholds links to archived, confidential or BA-bearing notes outside the export, writing `{withheld: n}` and naming the target nowhere. Generated text naming such targets: 248 → **0** (psychology) and 70 → **0** (ai-concepts); markers equal the exporter's count (96, 27) and "does not resolve" warnings fall by exactly that; both bundles still pass Level 3 under both parsers and stay 100% canonical; 3 new validator tests pass under both parsers. **All pass**: the marker is in SPEC §6.1 (proposed v0.5). The `samos` leak is closed. Detail in `e14-withheld-links/e14-results.md`.
+**2026-10-03.** Plan `fdcd6f1`. The vault exporter withholds links to archived, confidential or BA-bearing notes outside the export, writing `{withheld: n}` and naming the target nowhere. Generated text naming such targets: 248 → **0** (psychology) and 70 → **0** (ai-concepts); markers equal the exporter's count (96, 27) and "does not resolve" warnings fall by exactly that; both bundles still pass Level 3 under both parsers and stay 100% canonical; 3 new validator tests pass under both parsers. **All pass**: the marker is in SPEC §6.1 (v0.5). The `samos` leak is closed. Detail in `e14-withheld-links/e14-results.md`.
 
 ---
 

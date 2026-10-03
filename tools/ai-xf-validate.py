@@ -1167,7 +1167,7 @@ def validate(bundle: Path, target_level: int, federation: dict | None = None):
                     findings.append(Finding("error", rel, f"{where} must be a mapping with `rel` and `to`"))
                     continue
                 if "withheld" in link:
-                    # §6.1 withheld marker (proposed v0.5, E14): a count, never a target
+                    # §6.1 withheld marker (v0.5, E14): a count, never a target
                     w = link.get("withheld")
                     if isinstance(w, bool) or not isinstance(w, int) or w < 1 or len(link) != 1:
                         findings.append(Finding("error", rel, f"{where} `withheld` must be the sole key with a positive integer count (§6.1)"))

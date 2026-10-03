@@ -11,12 +11,12 @@ AI-XF-aware agents read the same files and see more.
 
 | | |
 |---|---|
-| **Spec** | [`SPEC.md`](./SPEC.md) — v0.4.4, draft |
+| **Spec** | [`SPEC.md`](./SPEC.md) — v0.5, draft |
 | **Experiments** | [`experiments/`](./experiments/) — runnable evidence: federation (E1–E7), freshness and interoperability (E8–E9), maturity journeys into a database, from a wiki and into another system (E10–E12); numbers in [`RESULTS.md`](./experiments/RESULTS.md) |
 | **Curation policy** (non-normative) | [`CURATOR.md`](./CURATOR.md) — seven rules and four numbers to paste into an agent's instructions |
 | **Worked example** | [`examples/`](./examples/) — passes the validator at Level 3 |
 | **Validator** | [`tools/ai-xf-validate.py`](./tools/ai-xf-validate.py) — conformance ladder, `--stats` (curation health and freshness), `--federation`; no dependencies |
-| **Canonical form** (proposed, v0.5) | [`tools/ai-xf-canon.py`](./tools/ai-xf-canon.py) — writes the one canonical serialisation of a concept and its `sha256:` content hash (SPEC §5.7, Appendix D); needs PyYAML |
+| **Canonical form** (v0.5) | [`tools/ai-xf-canon.py`](./tools/ai-xf-canon.py) — writes the one canonical serialisation of a concept and its `sha256:` content hash (SPEC §5.7, Appendix D); needs PyYAML |
 
 ---
 
@@ -228,10 +228,13 @@ be a superset of OKF; AI-XF is that superset written down.
   validator reports what a bundle has stopped reconciling (E8, E9).
 - **v0.4.4** (2026-10-03): the validator honours custom rels a bundle declares
   in its own vocabulary, found by a second producer (E12).
-- **v0.5** (proposed, 2026-10-03): a canonical serialisation and content hash,
-  so a database, an importer and a file system write the same bytes for the
-  same concept. Pre-registered and tested first (E13: two independent
-  implementations byte-identical on 268 concepts from five producers).
+- **v0.5** (2026-10-03): a canonical serialisation and content hash, so a
+  database, an importer and a file system write the same bytes for the same
+  concept; and a withheld-link marker, so a bundle can say a link was removed
+  without naming its target. Pre-registered and tested first (E13 to E13d: two
+  independent implementations byte-identical on 273 concepts from five
+  producers and an adversarial set; E14: withheld targets named 0 times, from
+  318).
 
 ## Naming
 
@@ -244,8 +247,9 @@ and v0.4.1), and the validator still reads those spellings.
 
 ## Status
 
-AI-XF v0.4 is a draft designed for backward-compatible growth. Every v0.3 bundle
-is a valid v0.4 bundle, and every v0.2 bundle a valid v0.3 one; v0.1 bundles
+AI-XF v0.5 is a draft designed for backward-compatible growth. Every v0.4 bundle
+is a valid v0.5 bundle (canonical form is a SHOULD, never a reason to reject),
+every v0.3 bundle a valid v0.4 one, and every v0.2 bundle a valid v0.3 one; v0.1 bundles
 remain valid input, with their deprecated fields (`timestamp`,
 `provenance.verified` / `.freshness` / `.reviewed`) read but no longer written.
 Bare-date timestamps are read the same way, with a warning. See the changelog

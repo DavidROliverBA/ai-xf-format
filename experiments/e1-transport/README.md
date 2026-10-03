@@ -48,7 +48,7 @@ bare git repository (built once by `setup.sh`, acting as a "remote"):
 ## How to run
 
 ```bash
-cd /Users/davidoliver/github/ai-xf-format
+cd /Users/davidoliver/Documents/GitHub/ai-xf-format
 ./experiments/e1-transport/run.sh
 ```
 

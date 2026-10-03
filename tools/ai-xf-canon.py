@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ai-xf-canon: the AI-XF canonical serialisation and content hash (SPEC §5.7, Appendix D).
 
-Proposed for v0.5; tested by experiment E13 (two independent implementations, 268 concepts,
+AI-XF v0.5; tested by experiment E13 (two independent implementations, 268 concepts,
 byte-identical). Unlike the validator this needs PyYAML, used only as a parser, with YAML 1.2
 core resolvers and no timestamp type, so the data model is the one Appendix D.1 defines.
 
