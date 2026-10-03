@@ -104,6 +104,7 @@ function doubleQuote(s: string): string {
 }
 
 function scalar(v: Value, key?: string): string {
+  if ((v as unknown) === undefined) throw new Error("undefined is not a YAML value: drop the key instead"); // not data
   if (v === null) return "null";
   if (typeof v === "boolean") return v ? "true" : "false";
   if (typeof v === "number") {
